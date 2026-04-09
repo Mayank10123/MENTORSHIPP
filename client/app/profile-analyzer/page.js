@@ -23,7 +23,6 @@ export default function ProfileAnalyzer() {
       const skillArray = skills.split(',').map(s => s.trim());
       const data = await safeApiFetch(`${API_URLS.PYTHON}/analyze/profile`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           cgpa: parseFloat(cgpa),
           skills: skillArray,
@@ -33,9 +32,10 @@ export default function ProfileAnalyzer() {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         setAnalysis(data);
+      } else {
+        setAnalysis(null);
       }
     } catch (error) {
       console.error('Error:', error);
