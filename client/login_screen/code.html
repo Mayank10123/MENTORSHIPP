@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>CareerAgent AI | Executive Login</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-container": "#1c2b3c",
+                        "on-tertiary": "#233143",
+                        "surface-dim": "#0b1326",
+                        "primary": "#adc6ff",
+                        "surface-container-high": "#222a3d",
+                        "on-primary-fixed": "#001a42",
+                        "outline": "#8c909f",
+                        "surface-variant": "#2d3449",
+                        "secondary": "#4edea3",
+                        "secondary-container": "#00a572",
+                        "tertiary": "#b9c8de",
+                        "primary-fixed-dim": "#adc6ff",
+                        "outline-variant": "#424754",
+                        "tertiary-container": "#8392a6",
+                        "on-tertiary-fixed": "#0d1c2d",
+                        "surface-container-low": "#131b2e",
+                        "on-surface": "#dae2fd",
+                        "primary-container": "#4d8eff",
+                        "inverse-surface": "#dae2fd",
+                        "primary-fixed": "#d8e2ff",
+                        "on-tertiary-fixed-variant": "#39485a",
+                        "on-secondary-fixed": "#002113",
+                        "surface-tint": "#adc6ff",
+                        "on-secondary-container": "#00311f",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed": "#6ffbbe",
+                        "surface-container": "#171f33",
+                        "on-primary-fixed-variant": "#004395",
+                        "surface-container-lowest": "#060e20",
+                        "on-secondary-fixed-variant": "#005236",
+                        "tertiary-fixed-dim": "#b9c8de",
+                        "on-primary-container": "#00285d",
+                        "on-error-container": "#ffdad6",
+                        "on-surface-variant": "#c2c6d6",
+                        "inverse-on-surface": "#283044",
+                        "tertiary-fixed": "#d4e4fa",
+                        "surface-container-highest": "#2d3449",
+                        "inverse-primary": "#005ac2",
+                        "error": "#ffb4ab",
+                        "surface": "#0b1326",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary": "#002e6a",
+                        "on-error": "#690005",
+                        "background": "#0b1326",
+                        "on-secondary": "#003824",
+                        "error-container": "#93000a",
+                        "on-background": "#dae2fd",
+                        "brand-accent": "#ff8c42" 
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .executive-blur {
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .orange-glow {
+            background: radial-gradient(circle at top right, rgba(255, 140, 66, 0.15) 0%, transparent 50%);
+        }
+        .kinetic-pulse {
+            box-shadow: 0 0 20px rgba(77, 142, 255, 0.2);
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        h1, h2, h3 {
+            font-family: 'Manrope', sans-serif;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+<!-- Background Architectural Elements -->
+<div class="absolute inset-0 z-0 pointer-events-none orange-glow"></div>
+<div class="absolute inset-0 z-0 opacity-10 pointer-events-none" style="background-image: radial-gradient(#4d8eff 0.5px, transparent 0.5px); background-size: 40px 40px;"></div>
+<!-- Login Container -->
+<main class="z-10 w-full max-w-[440px] px-6">
+<!-- Brand Identity -->
+<div class="flex flex-col items-center mb-10">
+<div class="mb-4 flex items-center justify-center w-16 h-16 rounded-xl bg-surface-container-highest executive-blur relative overflow-hidden">
+<span class="material-symbols-outlined text-[#3b82f6] text-4xl" data-icon="psychology">psychology</span>
+<div class="absolute inset-0 bg-gradient-to-tr from-[#3b82f6]/10 to-transparent"></div>
+</div>
+<h1 class="text-2xl font-black tracking-tighter text-[#3b82f6] uppercase">CareerAgent AI</h1>
+<p class="text-tertiary text-sm mt-1 font-medium tracking-wide">Secure Executive Portal</p>
+</div>
+<!-- Login Card -->
+<div class="bg-surface-container-low p-8 rounded-xl executive-blur relative group">
+<!-- Subtle Orange Accent Line (Top) -->
+<div class="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-brand-accent/50 to-transparent"></div>
+<form class="space-y-6"><!-- Google Sign In -->
+<button class="w-full bg-surface-container-highest border border-outline-variant/30 text-on-surface font-semibold py-4 rounded-lg flex items-center justify-center gap-3 hover:bg-surface-bright transition-all group/google" type="button">
+<svg class="w-5 h-5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"></path>
+<path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"></path>
+<path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"></path>
+<path d="M12 5.38c1.62 0 3.06.56 4.21 1.66l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"></path>
+</svg>
+<span class="text-sm">Sign in with Google</span>
+</button>
+<div class="flex items-center gap-4 py-2">
+<div class="h-[1px] flex-1 bg-surface-variant/50"></div>
+<span class="text-[10px] font-bold text-tertiary/60 uppercase tracking-widest">OR</span>
+<div class="h-[1px] flex-1 bg-surface-variant/50"></div>
+</div>
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="text-xs font-bold text-tertiary uppercase tracking-widest ml-1" for="email">Executive Email</label>
+<div class="relative group/input">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-tertiary text-xl" data-icon="mail">mail</span>
+</div>
+<input class="w-full bg-surface-container-highest border-none rounded-lg py-4 pl-12 pr-4 text-on-surface placeholder:text-tertiary/40 focus:ring-1 focus:ring-primary/40 transition-all text-sm outline-none" id="email" placeholder="j.smith@executive.com" type="email"/>
+</div>
+</div>
+<!-- Passkey Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center px-1">
+<label class="text-xs font-bold text-tertiary uppercase tracking-widest" for="passkey">Security Passkey</label>
+<a class="text-[10px] text-brand-accent font-bold uppercase tracking-tighter hover:opacity-80 transition-opacity" href="#">Request Recovery</a>
+</div>
+<div class="relative group/input">
+<div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-tertiary text-xl" data-icon="lock">lock</span>
+</div>
+<input class="w-full bg-surface-container-highest border-none rounded-lg py-4 pl-12 pr-12 text-on-surface placeholder:text-tertiary/40 focus:ring-1 focus:ring-primary/40 transition-all text-sm outline-none" id="passkey" placeholder="••••••••••••" type="password"/>
+<div class="absolute inset-y-0 right-0 pr-4 flex items-center">
+<button class="hover:text-primary transition-colors text-tertiary" type="button">
+<span class="material-symbols-outlined text-xl" data-icon="visibility">visibility</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Sign In Button -->
+<button class="w-full bg-primary-container text-on-primary-container font-bold py-4 rounded-lg flex items-center justify-center gap-2 group/btn relative overflow-hidden kinetic-pulse transition-transform active:scale-[0.98]" type="submit">
+<div class="absolute inset-0 bg-gradient-to-r from-white/10 to-transparent -translate-x-full group-hover/btn:translate-x-full transition-transform duration-700 ease-in-out"></div>
+<span class="font-headline tracking-tight text-lg">Sign In</span>
+<span class="material-symbols-outlined text-xl transition-transform group-hover/btn:translate-x-1" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</form>
+<!-- SSO / Alternate Login -->
+<div class="mt-10 space-y-4">
+<div class="flex items-center gap-4">
+<div class="h-[1px] flex-1 bg-surface-variant"></div>
+<span class="text-[10px] font-bold text-tertiary uppercase tracking-[0.2em]">Enterprise Access</span>
+<div class="h-[1px] flex-1 bg-surface-variant"></div>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<button class="flex items-center justify-center gap-2 bg-surface-container-high py-3 rounded-lg hover:bg-surface-bright transition-colors group/sso">
+<span class="material-symbols-outlined text-xl text-tertiary group-hover/sso:text-primary" data-icon="corporate_fare">corporate_fare</span>
+<span class="text-xs font-semibold text-on-surface">SSO Auth</span>
+</button>
+<button class="flex items-center justify-center gap-2 bg-surface-container-high py-3 rounded-lg hover:bg-surface-bright transition-colors group/sso">
+<span class="material-symbols-outlined text-xl text-tertiary group-hover/sso:text-primary" data-icon="key">key</span>
+<span class="text-xs font-semibold text-on-surface">Hardware</span>
+</button>
+</div>
+</div>
+<!-- Sign Up Link -->
+<div class="mt-8 text-center">
+<p class="text-xs text-tertiary">
+    Don't have an account? 
+    <a class="text-primary hover:text-primary/80 font-bold transition-colors ml-1" href="#">Sign up</a>
+</p>
+</div></div>
+<!-- Footer Meta -->
+<div class="mt-12 flex flex-col items-center space-y-6">
+<div class="flex items-center gap-2 bg-surface-container-low/50 px-4 py-1.5 rounded-full border border-outline-variant/10">
+<div class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></div>
+<span class="text-[10px] font-bold uppercase tracking-widest text-tertiary">Powered by Agentic Intelligence</span>
+</div>
+<nav class="flex items-center gap-6">
+<a class="text-[11px] text-tertiary hover:text-on-surface transition-colors font-medium" href="#">Privacy Protocol</a>
+<div class="w-1 h-1 rounded-full bg-surface-variant"></div>
+<a class="text-[11px] text-tertiary hover:text-on-surface transition-colors font-medium" href="#">Compliance</a>
+<div class="w-1 h-1 rounded-full bg-surface-variant"></div>
+<a class="text-[11px] text-tertiary hover:text-on-surface transition-colors font-medium" href="#">Technical Support</a>
+</nav>
+</div>
+</main>
+<!-- Decoration: Asymmetric High-End Elements -->
+<div class="absolute top-[15%] left-[10%] w-[400px] h-[400px] bg-primary/5 rounded-full blur-[100px] pointer-events-none"></div>
+<div class="absolute bottom-[5%] right-[5%] w-[300px] h-[300px] bg-brand-accent/5 rounded-full blur-[80px] pointer-events-none"></div>
+<!-- Floating Data Chip (Editorial Accent) -->
+<div class="hidden lg:flex absolute top-12 right-12 bg-surface-container-highest p-4 rounded-xl executive-blur border border-outline-variant/10 flex-col gap-2 shadow-2xl">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="shield_with_heart" style="font-variation-settings: 'FILL' 1;">shield_with_heart</span>
+</div>
+<div>
+<p class="text-[10px] text-tertiary font-bold uppercase tracking-wider">System Status</p>
+<p class="text-xs font-semibold text-on-surface">Fully Encrypted</p>
+</div>
+</div>
+</div>
+</body></html>

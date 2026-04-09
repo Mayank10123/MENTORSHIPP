@@ -1,0 +1,1137 @@
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+
+export default function Interview() {
+  const [stage, setStage] = useState('mode-selection'); // mode-selection, setup, interview, results
+  const [selectedMode, setSelectedMode] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [score, setScore] = useState(0);
+  const [generatedQuestions, setGeneratedQuestions] = useState([]);
+  const [allAnswers, setAllAnswers] = useState([]);
+  const [finalEvaluation, setFinalEvaluation] = useState(null);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const [setupStep, setSetupStep] = useState(0);
+  const recognitionRef = useRef(null);
+  const synthesisRef = useRef(null);
+
+  // Setup questions
+  const setupQuestions = [
+    { id: 'role', question: 'What is your target role?', placeholder: 'e.g., Senior Frontend Developer' },
+    { id: 'experience', question: 'What is your experience level?', placeholder: 'e.g., 3-5 years' },
+    { id: 'skills', question: 'What are your top 3 technical skills?', placeholder: 'e.g., React, Node.js, PostgreSQL' },
+    { id: 'company', question: 'What is your target company/industry?', placeholder: 'e.g., FAANG, Startup' },
+    { id: 'focus', question: 'What topics to focus on?', placeholder: 'e.g., System Design, DSA' },
+    { id: 'goal', question: 'What is your main career goal?', placeholder: 'e.g., Get promoted, Switch roles' },
+  ];
+
+  const [setupAnswers, setSetupAnswers] = useState({
+    role: '',
+    experience: '',
+    skills: '',
+    company: '',
+    focus: '',
+    goal: '',
+  });
+
+  // Initialize Web Speech API
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            setTranscript((prev) => prev + ' ' + transcript);
+          } else {
+            interim += transcript;
+          }
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+    }
+
+    synthesisRef.current = window.speechSynthesis;
+  }, []);
+
+  const getDefaultQuestions = () => {
+    const questionsByMode = {
+      hr: [
+        'Tell me about yourself and your career journey.',
+        'Why are you interested in this position?',
+        'Describe a challenging situation you overcame.',
+        'How do you handle conflict with team members?',
+        'Give an example of a project you led.',
+        'How do you stay updated with industry trends?',
+        'Describe your approach to problem-solving.',
+        'What are your key strengths and weaknesses?',
+        'How do you balance multiple priorities?',
+        'Where do you see yourself in 5 years?',
+        'Tell me about a time you failed and learned.',
+        'How do you handle feedback and criticism?',
+        'Describe your ideal work environment.',
+        'Why should we hire you over others?',
+        'What questions do you have for us?',
+      ],
+      dsa: [
+        'How would you reverse a linked list?',
+        'Explain BFS vs DFS algorithms.',
+        'What is the time complexity of merge sort?',
+        'Find longest substring without repeating characters.',
+        'How would you detect a cycle in a graph?',
+        'Implement binary search and explain complexity.',
+        'What is dynamic programming with example?',
+        'Explain recursion with a practical example.',
+        'Find intersection of two linked lists.',
+        'Solve the two-sum problem.',
+        'Explain hash tables and use cases.',
+        'Implement stack using queue.',
+        'What is a trie data structure?',
+        'Difference between heap sort and quick sort?',
+        'Solve longest palindromic substring?',
+      ],
+      system_design: [
+        'Design a URL shortening service.',
+        'Design a distributed cache system.',
+        'How to architect a real-time notification system?',
+        'Design a load balancer for web apps.',
+        'How would you design a video streaming platform?',
+        'Design a social media feed algorithm.',
+        'How to architect a search engine?',
+        'Design a rate limiting system.',
+        'Design a database that scales horizontally.',
+        'How to solve distributed transactions?',
+        'Design a message queue system.',
+        'Explain microservices architecture benefits.',
+        'Design an authorization system.',
+        'Design a recommendation engine.',
+        'How to handle database replication?',
+      ],
+    };
+    return questionsByMode[selectedMode] || questionsByMode.hr;
+  };
+
+  const generateInterviewQuestions = async () => {
+    setIsLoadingQuestions(true);
+    try {
+      const prompt = `You are an expert interviewer. Generate exactly 15 tailored interview questions based on this profile:
+
+**Candidate:** Role: ${setupAnswers.role}, Experience: ${setupAnswers.experience}, Skills: ${setupAnswers.skills}, Target: ${setupAnswers.company}, Focus: ${setupAnswers.focus}, Goal: ${setupAnswers.goal}
+**Mode:** ${selectedMode?.replace('_', ' ').toUpperCase()}
+
+Requirements:
+1. Questions must be progressively harder
+2. Customize based on their role and experience
+3. Mix technical and soft skills
+4. Exactly 15 questions
+
+Respond ONLY as JSON: {"questions": ["Q1?", "Q2?", ...]}`;
+
+      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_input: 'Generate interview questions',
+          context: prompt,
+        }),
+      });
+
+      const data = await response.json();
+      
+      try {
+        let text = data.suggestion || '';
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          const parsed = JSON.parse(match[0]);
+          setGeneratedQuestions(parsed.questions || []);
+        } else {
+          setGeneratedQuestions(getDefaultQuestions());
+        }
+      } catch (e) {
+        setGeneratedQuestions(getDefaultQuestions());
+      }
+    } catch (error) {
+      setGeneratedQuestions(getDefaultQuestions());
+    }
+    setIsLoadingQuestions(false);
+  };
+
+  const evaluateEntireInterview = async () => {
+    setIsEvaluating(true);
+    try {
+      const qaText = generatedQuestions
+        .map((q, idx) => `Q${idx + 1}: ${q}\nA${idx + 1}: ${allAnswers[idx]?.transcript || 'No answer'} (Score: ${allAnswers[idx]?.feedback?.score || 0}/100)`)
+        .join('\n\n');
+
+      const prompt = `Expert interview evaluator. Analyze this complete interview:
+
+**Candidate:** Role: ${setupAnswers.role}, Experience: ${setupAnswers.experience}, Skills: ${setupAnswers.skills}
+**Interview Mode:** ${selectedMode?.replace('_', ' ').toUpperCase()}
+
+**All Q&A:**
+${qaText}
+
+Provide detailed JSON evaluation:
+{
+  "overall_score": (0-100),
+  "strengths": ["str1", "str2", "str3"],
+  "weaknesses": ["weak1", "weak2", "weak3"],
+  "technical_skills": {"rating": 0-100, "comments": "..."},
+  "communication": {"rating": 0-100, "comments": "..."},
+  "problem_solving": {"rating": 0-100, "comments": "..."},
+  "soft_skills": {"rating": 0-100, "comments": "..."},
+  "recommendations": ["rec1", "rec2", "rec3", "rec4", "rec5"],
+  "final_remarks": "Summary of performance..."
+}`;
+
+      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_input: 'Evaluate interview',
+          context: prompt,
+        }),
+      });
+
+      const data = await response.json();
+      try {
+        let text = data.suggestion || '';
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          setFinalEvaluation(JSON.parse(match[0]));
+        } else {
+          setFinalEvaluation(getDefaultEvaluation());
+        }
+      } catch (e) {
+        setFinalEvaluation(getDefaultEvaluation());
+      }
+    } catch (error) {
+      setFinalEvaluation(getDefaultEvaluation());
+    }
+    setIsEvaluating(false);
+  };
+
+  const getDefaultEvaluation = () => {
+    const avgScore = allAnswers.length > 0
+      ? Math.round(allAnswers.reduce((sum, a) => sum + (a.feedback?.score || 0), 0) / allAnswers.length)
+      : 0;
+
+    return {
+      overall_score: avgScore,
+      strengths: ['Good articulation', 'Logical thinking', 'Problem-solving ability'],
+      weaknesses: ['Needs more examples', 'Could elaborate', 'Practice required'],
+      technical_skills: { rating: avgScore, comments: 'Solid foundation' },
+      communication: { rating: Math.min(100, avgScore + 10), comments: 'Clear and concise' },
+      problem_solving: { rating: avgScore, comments: 'Logical approach' },
+      soft_skills: { rating: Math.max(50, avgScore - 10), comments: 'Good basics' },
+      recommendations: [
+        'Practice more problems daily',
+        'Work on real projects',
+        'Study advanced patterns',
+        'Improve with real examples',
+        'Mock interviews weekly',
+      ],
+      final_remarks: `You showed ${avgScore > 75 ? 'excellent' : avgScore > 60 ? 'good' : 'promising'} performance!`,
+    };
+  };
+
+  const speakQuestion = (question) => {
+    if (synthesisRef.current) {
+      const utterance = new SpeechSynthesisUtterance(question);
+      utterance.rate = 1;
+      synthesisRef.current.speak(utterance);
+    }
+  };
+
+  const generateMockFeedback = (answer) => {
+    const wordCount = answer.split(' ').length;
+    return {
+      score: Math.min(95, 55 + (wordCount > 20 ? 20 : 0) + (/example|like|specifically/i.test(answer) ? 20 : 0)),
+      clarity: Math.min(100, 50 + wordCount),
+      structure: /example|specifically/i.test(answer) ? 85 : 60,
+      relevance: (Math.random() * 30 + 60).toFixed(0),
+      suggestions: [
+        wordCount > 20 ? '✓ Good detail' : '⚠️ More details needed',
+        /example|specifically/i.test(answer) ? '✓ Good examples' : '⚠️ Add examples',
+        answer.length > 100 ? '✓ Adequate length' : '⚠️ Could elaborate',
+      ],
+    };
+  };
+
+  const startRecording = () => {
+    if (recognitionRef.current) {
+      setTranscript('');
+      setIsRecording(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+      const fb = generateMockFeedback(transcript);
+      setFeedback(fb);
+      setScore(fb.score);
+    }
+  };
+
+  const handleSetupNext = () => {
+    if (setupStep < setupQuestions.length - 1) {
+      setSetupStep(setupStep + 1);
+    } else {
+      startInterview();
+    }
+  };
+
+  const handleSetupChange = (value) => {
+    setSetupAnswers((prev) => ({ ...prev, [setupQuestions[setupStep].id]: value }));
+  };
+
+  const startInterview = async () => {
+    setStage('interview');
+    await generateInterviewQuestions();
+    if (generatedQuestions.length === 0) {
+      setGeneratedQuestions(getDefaultQuestions());
+    }
+    setQuestionIndex(0);
+  };
+
+  const nextQuestion = async () => {
+    if (!feedback) return;
+
+    const newAnswers = [...allAnswers];
+    newAnswers[questionIndex] = { transcript, feedback };
+    setAllAnswers(newAnswers);
+
+    if (questionIndex + 1 < generatedQuestions.length) {
+      setQuestionIndex(questionIndex + 1);
+      setTranscript('');
+      setFeedback(null);
+      speakQuestion(generatedQuestions[questionIndex + 1]);
+    } else {
+      setStage('results');
+      await evaluateEntireInterview();
+    }
+  };
+
+  const reset = () => {
+    setStage('mode-selection');
+    setSelectedMode(null);
+    setSetupStep(0);
+    setSetupAnswers({ role: '', experience: '', skills: '', company: '', focus: '', goal: '' });
+    setGeneratedQuestions([]);
+    setAllAnswers([]);
+    setFinalEvaluation(null);
+    setQuestionIndex(0);
+    setTranscript('');
+    setFeedback(null);
+    setScore(0);
+  };
+
+  return (
+    <div>
+      <header className="mb-10">
+        <h1 className="text-4xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Interview Studio</h1>
+        <p className="text-tertiary body-md">Groq-powered interviews: Setup → 15 Questions → Detailed Evaluation</p>
+      </header>
+
+      {/* MODE SELECTION */}
+      {stage === 'mode-selection' && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { id: 'hr', title: 'HR Interview', icon: 'person', desc: 'Behavioral & communication skills' },
+            { id: 'dsa', title: 'DSA (Coding)', icon: 'code', desc: 'Algorithm & data structure problems' },
+            { id: 'system_design', title: 'System Design', icon: 'architecture', desc: 'Architecture & scalability' },
+          ].map((mode) => (
+            <div
+              key={mode.id}
+              onClick={() => {
+                setSelectedMode(mode.id);
+                setStage('setup');
+              }}
+              className="bg-surface-container-low rounded-xl p-8 cursor-pointer hover:bg-surface-container-highest transition-all group"
+            >
+              <span className="material-symbols-outlined text-5xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                {mode.icon}
+              </span>
+              <h3 className="text-lg font-bold text-on-surface mb-2">{mode.title}</h3>
+              <p className="text-sm text-on-surface-variant">{mode.desc}</p>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* SETUP STAGE */}
+      {stage === 'setup' && (
+        <div className="max-w-2xl mx-auto">
+          <div className="bg-surface-container rounded-xl p-8 space-y-6">
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-on-surface mb-2">
+                Question {setupStep + 1} of {setupQuestions.length}
+              </h2>
+              <div className="w-full h-2 bg-surface-container-low rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all"
+                  style={{ width: `${((setupStep + 1) / setupQuestions.length) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <label className="block text-lg font-semibold text-on-surface">
+                {setupQuestions[setupStep].question}
+              </label>
+              <input
+                type="text"
+                placeholder={setupQuestions[setupStep].placeholder}
+                value={setupAnswers[setupQuestions[setupStep].id]}
+                onChange={(e) => handleSetupChange(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSetupNext()}
+                autoFocus
+                className="w-full px-4 py-3 rounded-lg bg-surface-container-low border-2 border-outline text-on-surface placeholder-on-surface-variant focus:border-primary focus:outline-none transition"
+              />
+            </div>
+
+            <div className="flex gap-4 pt-6">
+              <button
+                onClick={handleSetupNext}
+                className="flex-1 px-6 py-3 rounded-lg bg-primary text-surface font-semibold hover:bg-primary-container transition-all"
+              >
+                {setupStep === setupQuestions.length - 1 ? 'Start Interview' : 'Next'}
+              </button>
+              {setupStep > 0 && (
+                <button
+                  onClick={() => setSetupStep(setupStep - 1)}
+                  className="px-6 py-3 rounded-lg border-2 border-outline text-on-surface font-semibold hover:bg-surface-container-low transition-all"
+                >
+                  Back
+                </button>
+              )}
+              {setupStep === 0 && (
+                <button
+                  onClick={reset}
+                  className="px-6 py-3 rounded-lg border-2 border-outline text-on-surface font-semibold hover:bg-surface-container-low transition-all"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* INTERVIEW STAGE */}
+      {stage === 'interview' && (
+        <div className="bg-surface-container rounded-xl p-8 space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-on-surface capitalize">
+                {selectedMode.replace('_', ' ')} - Question {questionIndex + 1}/{generatedQuestions.length}
+              </h2>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-on-surface-variant">Average Score</p>
+              <p className="text-2xl font-bold text-primary">{score.toFixed(0)}%</p>
+            </div>
+          </div>
+
+          <div className="bg-surface-container-low rounded-lg p-6 border-l-4 border-primary">
+            <p className="text-lg text-on-surface font-semibold">{generatedQuestions[questionIndex]}</p>
+            <button
+              onClick={() => speakQuestion(generatedQuestions[questionIndex])}
+              className="mt-4 text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-base">volume_up</span>
+              Repeat
+            </button>
+          </div>
+
+          <div className="bg-surface-container-low rounded-lg p-8 text-center">
+            <button
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all mx-auto mb-4 ${
+                isRecording ? 'bg-error animate-pulse' : 'bg-primary hover:bg-primary-container'
+              }`}
+            >
+              <span className="material-symbols-outlined text-4xl text-surface">
+                {isRecording ? 'stop_circle' : 'mic'}
+              </span>
+            </button>
+            <p className="text-sm text-on-surface">{isRecording ? 'Recording...' : 'Start Recording'}</p>
+          </div>
+
+          {transcript && (
+            <div className="bg-surface-container-low rounded-lg p-6">
+              <p className="text-sm text-on-surface-variant mb-2">Your Response</p>
+              <p className="text-on-surface">{transcript}</p>
+            </div>
+          )}
+
+          {feedback && (
+            <div className="bg-surface-container-low rounded-lg p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-on-surface">Feedback</h3>
+                <p className="text-2xl font-bold text-secondary">{feedback.score}</p>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                {[
+                  { label: 'Clarity', value: feedback.clarity },
+                  { label: 'Structure', value: feedback.structure },
+                  { label: 'Relevance', value: feedback.relevance },
+                ].map((metric) => (
+                  <div key={metric.label} className="bg-surface-container rounded-lg p-4 text-center">
+                    <p className="text-sm text-on-surface-variant">{metric.label}</p>
+                    <p className="text-xl font-bold text-primary">{metric.value}</p>
+                  </div>
+                ))}
+              </div>
+              <ul className="space-y-2">
+                {feedback.suggestions.map((s, i) => (
+                  <li key={i} className="text-sm text-on-surface flex items-center gap-2">
+                    <span className="material-symbols-outlined text-base">
+                      {s.includes('✓') ? 'check_circle' : 'info'}
+                    </span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          <div className="flex gap-4">
+            <button
+              onClick={nextQuestion}
+              disabled={!feedback}
+              className="flex-1 px-6 py-3 rounded-lg bg-primary text-surface font-semibold hover:bg-primary-container disabled:opacity-50 transition-all"
+            >
+              {questionIndex + 1 >= generatedQuestions.length ? 'Get Evaluation' : 'Next'}
+            </button>
+            <button
+              onClick={reset}
+              className="px-6 py-3 rounded-lg border-2 border-outline text-on-surface font-semibold hover:bg-surface-container-low transition-all"
+            >
+              Exit
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* RESULTS STAGE */}
+      {stage === 'results' && finalEvaluation && (
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="bg-gradient-to-r from-primary to-primary-container rounded-xl p-8 text-surface text-center">
+            <p className="text-sm uppercase opacity-90">Overall Performance</p>
+            <p className="text-6xl font-bold mt-2">{finalEvaluation.overall_score}%</p>
+            <p className="text-lg mt-4 opacity-90">{finalEvaluation.final_remarks}</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {[
+              { title: 'Technical Skills', data: finalEvaluation.technical_skills },
+              { title: 'Communication', data: finalEvaluation.communication },
+              { title: 'Problem Solving', data: finalEvaluation.problem_solving },
+              { title: 'Soft Skills', data: finalEvaluation.soft_skills },
+            ].map((skill) => (
+              <div key={skill.title} className="bg-surface-container rounded-xl p-6">
+                <div className="flex justify-between mb-4">
+                  <h3 className="font-bold text-on-surface">{skill.title}</h3>
+                  <span className="text-2xl font-bold text-primary">{skill.data.rating}</span>
+                </div>
+                <p className="text-sm text-on-surface-variant">{skill.data.comments}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-surface-container rounded-xl p-6">
+              <h3 className="font-bold text-on-surface mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">check_circle</span>
+                Strengths
+              </h3>
+              <ul className="space-y-2">
+                {finalEvaluation.strengths.map((s, i) => (
+                  <li key={i} className="text-sm text-on-surface-variant flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs text-primary mt-0.5">check</span>
+                    {s}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-surface-container rounded-xl p-6">
+              <h3 className="font-bold text-on-surface mb-4 flex items-center gap-2">
+                <span className="material-symbols-outlined text-secondary">priority_high</span>
+                Weaknesses
+              </h3>
+              <ul className="space-y-2">
+                {finalEvaluation.weaknesses.map((w, i) => (
+                  <li key={i} className="text-sm text-on-surface-variant flex items-start gap-2">
+                    <span className="material-symbols-outlined text-xs text-secondary mt-0.5">warning</span>
+                    {w}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+
+          <div className="bg-surface-container rounded-xl p-6">
+            <h3 className="font-bold text-on-surface mb-4 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">lightbulb</span>
+              Recommendations
+            </h3>
+            <ol className="space-y-2">
+              {finalEvaluation.recommendations.map((rec, i) => (
+                <li key={i} className="text-sm text-on-surface-variant flex items-start gap-3">
+                  <span className="font-bold text-primary">{i + 1}.</span>
+                  {rec}
+                </li>
+              ))}
+            </ol>
+          </div>
+
+          <button
+            onClick={reset}
+            className="w-full px-6 py-3 rounded-lg bg-primary text-surface font-semibold hover:bg-primary-container transition-all"
+          >
+            New Interview
+          </button>
+        </div>
+      )}
+
+      {isEvaluating && (
+        <div className="bg-surface-container rounded-xl p-12 text-center">
+          <div className="inline-block animate-spin">
+            <span className="material-symbols-outlined text-5xl text-primary">psychology</span>
+          </div>
+          <p className="mt-4 text-lg font-semibold text-on-surface">Evaluating your performance...</p>
+        </div>
+      )}
+    </div>
+  );
+}
+'use client';
+
+import { useState, useRef, useEffect } from 'react';
+
+export default function Interview() {
+  const [stage, setStage] = useState('mode-selection'); // mode-selection, setup, interview, results
+  const [selectedMode, setSelectedMode] = useState(null);
+  const [isRecording, setIsRecording] = useState(false);
+  const [transcript, setTranscript] = useState('');
+  const [currentQuestion, setCurrentQuestion] = useState('');
+  const [questionIndex, setQuestionIndex] = useState(0);
+  const [feedback, setFeedback] = useState(null);
+  const [score, setScore] = useState(0);
+  const [generatedQuestions, setGeneratedQuestions] = useState([]);
+  const [allAnswers, setAllAnswers] = useState([]);
+  const [finalEvaluation, setFinalEvaluation] = useState(null);
+  const [isLoadingQuestions, setIsLoadingQuestions] = useState(false);
+  const [isEvaluating, setIsEvaluating] = useState(false);
+  const recognitionRef = useRef(null);
+  const synthesisRef = useRef(null);
+
+  // Setup questions
+  const setupQuestions = [
+    { id: 'role', question: 'What is your target role? (e.g., Senior Frontend Developer, Backend Engineer)', placeholder: 'e.g., Full Stack Developer' },
+    { id: 'experience', question: 'What is your experience level?', placeholder: 'e.g., 3-5 years' },
+    { id: 'skills', question: 'What are your top 3 technical skills?', placeholder: 'e.g., React, Node.js, PostgreSQL' },
+    { id: 'company', question: 'What is your target company or industry?', placeholder: 'e.g., FAANG, Startup, Finance' },
+    { id: 'focus', question: 'Any specific topics you want to focus on?', placeholder: 'e.g., System Design, DSA, Leadership' },
+    { id: 'goal', question: 'What is your main career goal?', placeholder: 'e.g., Learn, Get promoted, Switch roles' },
+  ];
+
+  const [setupAnswers, setSetupAnswers] = useState({
+    role: '',
+    experience: '',
+    skills: '',
+    company: '',
+    focus: '',
+    goal: '',
+  });
+
+  // Initialize Web Speech API
+  useEffect(() => {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = false;
+      recognitionRef.current.interimResults = true;
+
+      recognitionRef.current.onresult = (event) => {
+        let interim = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            setTranscript((prev) => prev + ' ' + transcript);
+          } else {
+            interim += transcript;
+          }
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+      };
+    }
+
+    synthesisRef.current = window.speechSynthesis;
+  }, []);
+
+  // Generate interview questions using Groq
+  const generateInterviewQuestions = async () => {
+    setIsLoadingQuestions(true);
+    try {
+      const prompt = `Create a detailed professional interview for the following candidate:
+
+**Candidate Profile:**
+- Target Role: ${setupAnswers.role || 'Not specified'}
+- Experience Level: ${setupAnswers.experience || 'Not specified'}
+- Key Skills: ${setupAnswers.skills || 'Not specified'}
+- Target Company/Industry: ${setupAnswers.company || 'Not specified'}
+- Focus Areas: ${setupAnswers.focus || 'Not specified'}
+- Career Goal: ${setupAnswers.goal || 'Not specified'}
+- Interview Mode: ${selectedMode?.replace('_', ' ').toUpperCase() || 'General'}
+
+**Task:** Generate exactly 15 interview questions tailored to this candidate's profile. The questions should:
+1. Be progressively challenging (start with easier, move to harder)
+2. Address their focus areas and career goals
+3. Test both technical skills and soft skills where applicable
+4. Be specific to their target role and company
+
+Respond ONLY with a JSON array of questions in this exact format:
+{
+  "questions": [
+    "Question 1?",
+    "Question 2?",
+    ... (15 total questions)
+  ]
+}`;
+
+      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_input: 'Generate interview questions',
+          context: prompt,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch questions');
+
+      const data = await response.json();
+      
+      try {
+        // Extract JSON from the response
+        let questionsText = data.suggestion || '';
+        const jsonMatch = questionsText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          setGeneratedQuestions(parsed.questions || []);
+        } else {
+          // Fallback: use predefined questions
+          setGeneratedQuestions(getDefaultQuestions());
+        }
+      } catch (e) {
+        console.error('Error parsing questions:', e);
+        setGeneratedQuestions(getDefaultQuestions());
+      }
+    } catch (error) {
+      console.error('Error generating questions:', error);
+      setGeneratedQuestions(getDefaultQuestions());
+    }
+    setIsLoadingQuestions(false);
+  };
+
+  const getDefaultQuestions = () => {
+    const questionsByMode = {
+      hr: [
+        'Tell me about yourself and your career journey.',
+        'Why are you interested in this position?',
+        'Describe a challenging situation you overcame and how you handled it.',
+        'How do you handle conflict with team members?',
+        'Give an example of a project you led. What was your role?',
+        'How do you stay updated with industry trends?',
+        'Describe your approach to problem-solving.',
+        'What are your strengths and weaknesses?',
+        'How do you balance multiple priorities?',
+        'Where do you see yourself in 5 years?',
+        'Tell me about a time you failed and what you learned.',
+        'How do you handle feedback and criticism?',
+        'Describe your ideal work environment.',
+        'What are your salary expectations?',
+        'Why should we hire you?',
+      ],
+      dsa: [
+        'How would you reverse a linked list?',
+        'Explain the difference between BFS and DFS.',
+        'What is the time complexity of merge sort?',
+        'Design an algorithm to find the longest substring without repeating characters.',
+        'How would you detect a cycle in a graph?',
+        'Implement binary search and explain its time complexity.',
+        'What is dynamic programming and give an example.',
+        'Explain the concept of recursion with an example.',
+        'How would you find the intersection of two linked lists?',
+        'Design a solution to the two-sum problem.',
+        'Explain hash tables and their use cases.',
+        'How would you implement a stack using a queue?',
+        'What is a trie data structure and its applications?',
+        'Explain the difference between heap sort and quick sort.',
+        'How would you solve the longest palindromic substring problem?',
+      ],
+      system_design: [
+        'Design a URL shortening service like bit.ly.',
+        'How would you design a distributed cache system?',
+        'Explain how to architect a real-time notification system.',
+        'Design a load balancer for high-traffic web applications.',
+        'How would you design a video streaming platform?',
+        'Design a social media feed algorithm.',
+        'How would you architect a search engine?',
+        'Design a rate limiting system.',
+        'Explain how to design a database that scales horizontally.',
+        'How would you solve the distributed transaction problem?',
+        'Design a message queue system.',
+        'Explain microservices architecture and its benefits.',
+        'How would you design an authorization system?',
+        'Design a recommendation engine.',
+        'How would you handle database replication?',
+      ],
+    };
+    return questionsByMode[selectedMode] || questionsByMode.hr;
+  };
+
+  const startRecording = () => {
+    if (recognitionRef.current) {
+      setTranscript('');
+      setIsRecording(true);
+      recognitionRef.current.start();
+    }
+  };
+
+  const stopRecording = async () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsRecording(false);
+
+      // Simulate feedback (in production, send to Groq for real analysis)
+      const mockFeedback = generateMockFeedback(transcript);
+      setFeedback(mockFeedback);
+      setScore(mockFeedback.score);
+    }
+  };
+
+  const generateMockFeedback = (answer) => {
+    const wordCount = answer.split(' ').length;
+    const hasDetails = wordCount > 20;
+    const hasExamples = /example|specifically|like|such as/i.test(answer);
+    const relevanceScore = Math.random() * 30 + 60;
+
+    return {
+      score: Math.min(95, 60 + (hasDetails ? 15 : 0) + (hasExamples ? 20 : 0)),
+      clarity: Math.min(100, 50 + wordCount),
+      structure: hasExamples ? 85 : 60,
+      relevance: relevanceScore.toFixed(0),
+      suggestions: [
+        hasDetails ? '✓ Good detail level' : '⚠️ Provide more specific examples',
+        hasExamples ? '✓ Used concrete examples' : '⚠️ Include real-world examples',
+        answer.length > 100 ? '✓ Adequate response length' : '⚠️ Could elaborate more',
+      ],
+    };
+  };
+
+  const evaluateEntireInterview = async () => {
+    setIsEvaluating(true);
+    try {
+      const evaluationPrompt = `You are an expert interview evaluator. Analyze this interview performance:
+
+**Candidate Profile:**
+- Role: ${setupAnswers.role}
+- Experience: ${setupAnswers.experience}
+- Skills: ${setupAnswers.skills}
+- Target: ${setupAnswers.company}
+- Focus: ${setupAnswers.focus}
+
+**Interview Details:**
+- Mode: ${selectedMode?.replace('_', ' ').toUpperCase()}
+- Total Questions: ${generatedQuestions.length}
+
+**Questions & Answers:**
+${generatedQuestions
+  .map(
+    (q, idx) =>
+      `Q${idx + 1}: ${q}\nA${idx + 1}: ${allAnswers[idx]?.transcript || 'No answer provided'}\nScore: ${allAnswers[idx]?.feedback?.score || 0}/100\n`
+  )
+  .join('\n')}
+
+Please provide a detailed evaluation in JSON format with:
+{
+  "overall_score": (0-100),
+  "strengths": ["strength1", "strength2", "strength3"],
+  "weaknesses": ["weakness1", "weakness2", "weakness3"],
+  "technical_skills": { "rating": 0-100, "comments": "..." },
+  "communication": { "rating": 0-100, "comments": "..." },
+  "problem_solving": { "rating": 0-100, "comments": "..." },
+  "soft_skills": { "rating": 0-100, "comments": "..." },
+  "recommendations": ["rec1", "rec2", "rec3", "rec4", "rec5"],
+  "final_remarks": "Brief summary of overall performance..."
+}`;
+
+      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_input: 'Evaluate interview',
+          context: evaluationPrompt,
+        }),
+      });
+
+      if (!response.ok) throw new Error('Failed to get evaluation');
+
+      const data = await response.json();
+
+      try {
+        let evaluationText = data.suggestion || '';
+        const jsonMatch = evaluationText.match(/\{[\s\S]*\}/);
+        if (jsonMatch) {
+          const parsed = JSON.parse(jsonMatch[0]);
+          setFinalEvaluation(parsed);
+        } else {
+          setFinalEvaluation(getDefaultEvaluation());
+        }
+      } catch (e) {
+        console.error('Error parsing evaluation:', e);
+        setFinalEvaluation(getDefaultEvaluation());
+      }
+    } catch (error) {
+      console.error('Error evaluating interview:', error);
+      setFinalEvaluation(getDefaultEvaluation());
+    }
+    setIsEvaluating(false);
+  };
+
+  const getDefaultEvaluation = () => {
+    const avgScore = allAnswers.length > 0
+      ? Math.round(
+          allAnswers.reduce((sum, a) => sum + (a.feedback?.score || 0), 0) /
+            allAnswers.length
+        )
+      : 0;
+
+    return {
+      overall_score: avgScore,
+      strengths: ['Good communication', 'Clear thinking', 'Positive attitude'],
+      weaknesses: ['Need more examples', 'Could elaborate more', 'Practice is needed'],
+      technical_skills: { rating: avgScore, comments: 'Solid technical foundation' },
+      communication: { rating: Math.min(100, avgScore + 10), comments: 'Clear and articulate' },
+      problem_solving: { rating: avgScore, comments: 'Logical approach' },
+      soft_skills: { rating: Math.max(50, avgScore - 10), comments: 'Room for improvement' },
+      recommendations: [
+        'Practice more coding problems',
+        'Work on real-world projects',
+        'Study system design patterns',
+        'Improve your explanations with concrete examples',
+        'Mock interviews regularly',
+      ],
+      final_remarks: `Overall, you showed ${avgScore > 75 ? 'excellent' : avgScore > 60 ? 'good' : 'promising'} performance. Keep practicing!`,
+    };
+  };
+
+  const speakQuestion = (question) => {
+    if (synthesisRef.current) {
+      const utterance = new SpeechSynthesisUtterance(question);
+      utterance.rate = 1;
+      synthesisRef.current.speak(utterance);
+    }
+  };
+
+  const startInterview = (mode) => {
+    setSelectedMode(mode);
+    setInterviewStarted(true);
+    setQuestionIndex(0);
+    const question = questionSets[mode][0];
+    setCurrentQuestion(question);
+    speakQuestion(`Here's your first question. ${question}`);
+  };
+
+  const nextQuestion = () => {
+    const questions = questionSets[selectedMode];
+    if (questionIndex + 1 < questions.length) {
+      const nextIdx = questionIndex + 1;
+      setQuestionIndex(nextIdx);
+      const question = questions[nextIdx];
+      setCurrentQuestion(question);
+      setTranscript('');
+      setFeedback(null);
+      speakQuestion(`Next question. ${question}`);
+    } else {
+      endInterview();
+    }
+  };
+
+  const endInterview = () => {
+    setInterviewStarted(false);
+    setSelectedMode(null);
+    setTranscript('');
+    setFeedback(null);
+    setScore(0);
+  };
+
+  return (
+    <div>
+      <header className="mb-10">
+        <h1 className="text-4xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Interview Studio</h1>
+        <p className="text-tertiary body-md">AI-Driven mock interviews using Web Speech API.</p>
+      </header>
+
+      {!interviewStarted ? (
+        // Mode Selection
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[
+            { id: 'hr', title: 'HR Interview', icon: 'person', desc: 'Behavioral & communication skills' },
+            { id: 'dsa', title: 'DSA (Coding)', icon: 'code', desc: 'Algorithm & data structure problems' },
+            { id: 'system_design', title: 'System Design', icon: 'architecture', desc: 'Architecture & scalability' },
+          ].map((mode) => (
+            <div
+              key={mode.id}
+              onClick={() => startInterview(mode.id)}
+              className="bg-surface-container-low rounded-xl p-8 cursor-pointer hover:bg-surface-container-highest transition-all group"
+            >
+              <span className="material-symbols-outlined text-5xl text-primary mb-4 group-hover:scale-110 transition-transform">
+                {mode.icon}
+              </span>
+              <h3 className="text-lg font-bold text-on-surface mb-2">{mode.title}</h3>
+              <p className="text-sm text-on-surface-variant">{mode.desc}</p>
+            </div>
+          ))}
+        </div>
+      ) : (
+        // Interview Session
+        <div className="bg-surface-container rounded-xl p-8 space-y-6">
+          {/* Progress */}
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-bold text-on-surface capitalize">
+                {selectedMode.replace('_', ' ')} Interview
+              </h2>
+              <p className="text-sm text-on-surface-variant">
+                Question {questionIndex + 1} of {questionSets[selectedMode].length}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm text-on-surface-variant">Average Score</p>
+              <p className="text-2xl font-bold text-primary">{score.toFixed(0)}%</p>
+            </div>
+          </div>
+
+          {/* Question */}
+          <div className="bg-surface-container-low rounded-lg p-6 border-l-4 border-primary">
+            <p className="text-sm text-on-surface-variant uppercase tracking-wide mb-2">Current Question</p>
+            <p className="text-lg text-on-surface font-semibold">{currentQuestion}</p>
+            <button
+              onClick={() => speakQuestion(currentQuestion)}
+              className="mt-4 text-sm text-primary hover:underline flex items-center gap-1"
+            >
+              <span className="material-symbols-outlined text-base">volume_up</span>
+              Repeat Question
+            </button>
+          </div>
+
+          {/* Recording Area */}
+          <div className="bg-surface-container-low rounded-lg p-8 text-center">
+            <button
+              onClick={isRecording ? stopRecording : startRecording}
+              className={`w-24 h-24 rounded-full flex items-center justify-center transition-all mx-auto mb-4 ${
+                isRecording
+                  ? 'bg-error animate-pulse'
+                  : 'bg-primary hover:bg-primary-container'
+              }`}
+            >
+              <span className="material-symbols-outlined text-4xl text-surface">
+                {isRecording ? 'stop_circle' : 'mic'}
+              </span>
+            </button>
+            <p className="text-sm font-medium text-on-surface">
+              {isRecording ? 'Recording... Click to stop' : 'Click to start recording'}
+            </p>
+          </div>
+
+          {/* Transcript */}
+          {transcript && (
+            <div className="bg-surface-container-low rounded-lg p-6">
+              <p className="text-sm text-on-surface-variant uppercase tracking-wide mb-2">Your Response</p>
+              <p className="text-on-surface">{transcript}</p>
+            </div>
+          )}
+
+          {/* Feedback */}
+          {feedback && (
+            <div className="bg-surface-container-low rounded-lg p-6 space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-bold text-on-surface">Feedback</h3>
+                <div className="text-center">
+                  <p className="text-sm text-on-surface-variant">Score</p>
+                  <p className="text-2xl font-bold text-secondary">{feedback.score}</p>
+                </div>
+              </div>
+
+              {/* Confidence */}
+              <div>
+                <p className="text-sm text-on-surface-variant mb-2">Confidence Level</p>
+                <div className="w-full h-3 bg-surface-container rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary transition-all"
+                    style={{ width: `${feedback.confidence}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              {/* Suggestions */}
+              <div>
+                <p className="text-sm text-on-surface-variant mb-2">Suggestions</p>
+                <ul className="space-y-2">
+                  {feedback.suggestions.map((suggestion, idx) => (
+                    <li key={idx} className="text-sm text-on-surface flex items-center gap-2">
+                      <span className="material-symbols-outlined text-base">
+                        {suggestion.includes('✓') ? 'check_circle' : 'info'}
+                      </span>
+                      {suggestion}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+          )}
+
+          {/* Controls */}
+          <div className="flex gap-4">
+            <button
+              onClick={nextQuestion}
+              disabled={!feedback}
+              className="flex-1 px-6 py-3 rounded-lg bg-primary text-surface font-semibold hover:bg-primary-container disabled:opacity-50 transition-all"
+            >
+              {questionIndex + 1 >= questionSets[selectedMode].length ? 'Finish Interview' : 'Next Question'}
+            </button>
+            <button
+              onClick={endInterview}
+              className="px-6 py-3 rounded-lg border-2 border-outline text-on-surface font-semibold hover:bg-surface-container-low transition-all"
+            >
+              Exit
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

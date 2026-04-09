@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Resume Intelligence Lab - The Cognitive Architecture</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;700;800&amp;family=Inter:wght@400;500;600&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-surface-variant": "#c2c6d6",
+                    "primary-container": "#4d8eff",
+                    "on-tertiary": "#233143",
+                    "primary-fixed": "#d8e2ff",
+                    "on-background": "#dae2fd",
+                    "surface-dim": "#0b1326",
+                    "surface-tint": "#adc6ff",
+                    "on-surface": "#dae2fd",
+                    "on-tertiary-container": "#1c2b3c",
+                    "primary-fixed-dim": "#adc6ff",
+                    "on-primary-fixed": "#001a42",
+                    "surface-container": "#171f33",
+                    "error": "#ffb4ab",
+                    "surface-bright": "#31394d",
+                    "secondary-fixed-dim": "#4edea3",
+                    "on-primary-fixed-variant": "#004395",
+                    "outline-variant": "#424754",
+                    "tertiary-fixed-dim": "#b9c8de",
+                    "secondary": "#4edea3",
+                    "on-error-container": "#ffdad6",
+                    "error-container": "#93000a",
+                    "on-error": "#690005",
+                    "outline": "#8c909f",
+                    "surface-container-lowest": "#060e20",
+                    "on-secondary-fixed": "#002113",
+                    "on-tertiary-fixed": "#0d1c2d",
+                    "surface": "#0b1326",
+                    "surface-container-low": "#131b2e",
+                    "background": "#0b1326",
+                    "inverse-primary": "#005ac2",
+                    "inverse-surface": "#dae2fd",
+                    "secondary-container": "#00a572",
+                    "on-secondary": "#003824",
+                    "on-secondary-fixed-variant": "#005236",
+                    "tertiary-container": "#8392a6",
+                    "inverse-on-surface": "#283044",
+                    "primary": "#adc6ff",
+                    "tertiary": "#b9c8de",
+                    "surface-container-highest": "#2d3449",
+                    "on-primary-container": "#00285d",
+                    "surface-container-high": "#222a3d",
+                    "on-primary": "#002e6a",
+                    "on-secondary-container": "#00311f",
+                    "secondary-fixed": "#6ffbbe",
+                    "on-tertiary-fixed-variant": "#39485a",
+                    "tertiary-fixed": "#d4e4fa",
+                    "surface-variant": "#2d3449"
+            },
+            "borderRadius": {
+                    "DEFAULT": "8px",
+                    "lg": "12px",
+                    "xl": "16px",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Manrope"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(12px);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body selection:bg-primary/30">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-gradient-to-b from-[#0b1326] to-transparent">
+<div class="flex justify-between items-center px-8 h-16 w-full bg-[#0b1326]/60 backdrop-blur-xl">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tighter text-blue-100 font-headline">The Cognitive Architecture</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined cursor-pointer active:scale-95 hover:text-blue-200 transition-colors">bolt</span>
+<span class="material-symbols-outlined cursor-pointer active:scale-95 hover:text-blue-200 transition-colors">notifications</span>
+<span class="material-symbols-outlined cursor-pointer active:scale-95 hover:text-blue-200 transition-colors">account_circle</span>
+</div>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#0b1326] border-r border-slate-800/20 flex flex-col py-8 px-4 shadow-2xl shadow-black/40">
+<div class="mb-10 mt-12 flex flex-col items-center px-4">
+<div class="relative group">
+<div class="absolute -inset-0.5 bg-gradient-to-r from-primary to-secondary rounded-full blur opacity-30 group-hover:opacity-60 transition duration-1000"></div>
+<img alt="Executive User Profile" class="relative w-16 h-16 rounded-full bg-surface-container-highest border-2 border-primary/20" data-alt="Portrait of a sophisticated AI executive coach profile placeholder with soft blue lighting and professional atmosphere" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCYCOcQUoL_Bdq79YxExTCDgLVNNsLP05Pg8bxRYmEdouWlhMpWy7eP_QKWehhb3kGP3lGaSsDUXbC6_g6THU0bH3xZYMBD4gtsvYk4Boa9kcgVH2N7qReAn6hp8AI0vhkibKexUV3cB5IoEz3EtrFrYHiTCTdYHIhkCFFAgAUuvlCyTvVGwjsTLbfEkrodHwyjYQncnH72DZsTLdIYaPIbJbXdNuS7XMzunZn0X6YQeax0JC7RfHx_88x2gymvjX3J3yun_glv0J4"/>
+</div>
+<h2 class="mt-4 font-headline font-bold text-on-surface">Executive Coach</h2>
+<p class="text-xs text-secondary flex items-center gap-1">
+<span class="w-2 h-2 rounded-full bg-secondary animate-pulse"></span>
+                AI Pulse: Active
+            </p>
+</div>
+<nav class="flex-1 space-y-2">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:bg-slate-800/40 hover:text-slate-200 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:bg-slate-800/40 hover:text-slate-200 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">alt_route</span> Roadmap
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-500 hover:bg-slate-800/40 hover:text-slate-200 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">record_voice_over</span> Interview Studio
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-blue-400 border-r-2 border-blue-400 bg-blue-500/5 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined">description</span> Resume Lab
+            </a>
+</nav>
+<div class="mt-auto space-y-4 pt-6">
+<button class="w-full py-3 bg-primary-container text-on-primary-container rounded-lg font-bold text-sm hover:brightness-110 transition-all active:scale-95">
+                Upgrade to Pro
+            </button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:text-slate-200 text-sm" href="#">
+<span class="material-symbols-outlined text-xl">settings</span> Settings
+                </a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-slate-500 hover:text-slate-200 text-sm" href="#">
+<span class="material-symbols-outlined text-xl">help</span> Support
+                </a>
+</div>
+</div>
+</aside>
+<!-- Main Canvas -->
+<main class="pl-64 pt-16 min-h-screen bg-surface-container-lowest">
+<div class="max-w-7xl mx-auto p-8 lg:p-12">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
+<div class="space-y-2">
+<h1 class="text-4xl font-extrabold tracking-tight font-headline text-on-surface">Resume Intelligence Lab</h1>
+<p class="text-tertiary max-w-xl">Upload your resume to receive executive-level analytical feedback and AI-enhanced bullet point optimization.</p>
+</div>
+<div class="flex items-center gap-4">
+<div class="px-4 py-2 rounded-full glass-panel border border-outline-variant/15 flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(173,198,255,0.8)]"></span>
+<span class="text-xs font-bold uppercase tracking-widest text-primary">Live Coaching Engine</span>
+</div>
+</div>
+</div>
+<!-- Bento Grid Workspace -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+<!-- Left Column: Upload & Keywords -->
+<div class="lg:col-span-4 space-y-8">
+<!-- Upload Zone -->
+<div class="bg-surface-container-low rounded-xl p-8 border border-outline-variant/15 hover:border-primary/40 transition-colors group cursor-pointer">
+<div class="flex flex-col items-center text-center space-y-4">
+<div class="w-16 h-16 rounded-full bg-surface-container-highest flex items-center justify-center group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-3xl text-primary">cloud_upload</span>
+</div>
+<div>
+<h3 class="font-headline font-bold text-on-surface">Drop your resume here</h3>
+<p class="text-sm text-tertiary mt-1">PDF, DOCX up to 10MB</p>
+</div>
+<button class="px-6 py-2 rounded-md bg-surface-container-highest text-primary text-sm font-bold border border-primary/20">Browse Files</button>
+</div>
+</div>
+<!-- ATS Score Gauge -->
+<div class="bg-surface-container rounded-xl p-8 flex flex-col items-center relative overflow-hidden">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl"></div>
+<h3 class="text-sm font-bold tracking-widest uppercase text-tertiary mb-8">ATS Impact Score</h3>
+<div class="relative flex items-center justify-center">
+<svg class="w-48 h-48 transform -rotate-90">
+<circle class="text-surface-container-highest" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-primary" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="88.46" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute flex flex-col items-center">
+<span class="text-5xl font-black font-headline text-on-surface">84</span>
+<span class="text-sm font-medium text-tertiary">/ 100</span>
+</div>
+</div>
+<div class="mt-8 grid grid-cols-2 gap-4 w-full">
+<div class="bg-surface-container-low p-3 rounded-lg text-center">
+<p class="text-[10px] uppercase font-bold text-tertiary">Keywords</p>
+<p class="text-secondary font-bold">Strong</p>
+</div>
+<div class="bg-surface-container-low p-3 rounded-lg text-center">
+<p class="text-[10px] uppercase font-bold text-tertiary">Formatting</p>
+<p class="text-primary font-bold">Optimal</p>
+</div>
+</div>
+</div>
+<!-- Missing Keywords -->
+<div class="bg-surface-container-low rounded-xl p-6 border border-outline-variant/15">
+<h3 class="font-headline font-bold text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">analytics</span>
+                            Missing Keywords
+                        </h3>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">Strategic Planning</span>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">SaaS Metrics</span>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">Stakeholder Management</span>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">Agile Frameworks</span>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">P&amp;L Responsibility</span>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">Cross-functional Leadership</span>
+<span class="px-3 py-1 bg-tertiary-container/20 text-tertiary text-xs rounded-full border border-tertiary/10">Data-Driven Insights</span>
+</div>
+<div class="mt-6 pt-4 border-t border-outline-variant/10">
+<p class="text-xs text-tertiary leading-relaxed italic">"Integrating 'Strategic Planning' could increase your relevance for CEO-level roles by 14%."</p>
+</div>
+</div>
+</div>
+<!-- Right Column: AI Optimization -->
+<div class="lg:col-span-8 space-y-8">
+<!-- Side-by-Side Comparison Container -->
+<div class="bg-surface-container rounded-xl overflow-hidden shadow-2xl shadow-black/20">
+<div class="p-6 border-b border-outline-variant/15 flex justify-between items-center bg-surface-container-high">
+<h3 class="font-headline font-bold text-on-surface">Experience Optimization</h3>
+<div class="flex gap-2">
+<button class="p-2 rounded-md hover:bg-surface-container-highest text-tertiary">
+<span class="material-symbols-outlined">settings_backup_restore</span>
+</button>
+<button class="p-2 rounded-md hover:bg-surface-container-highest text-tertiary">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2">
+<!-- Original Side -->
+<div class="p-8 border-r border-outline-variant/10 bg-surface-container-low">
+<div class="flex items-center gap-2 mb-6 text-tertiary">
+<span class="material-symbols-outlined text-sm">history</span>
+<span class="text-xs font-bold uppercase tracking-widest">Original Draft</span>
+</div>
+<div class="space-y-8">
+<div class="space-y-4">
+<div class="p-4 rounded-lg bg-surface-container-lowest/50 border-l-2 border-slate-500/30">
+<p class="text-sm text-slate-400 leading-relaxed">Managed a large team of developers and helped build new software products for various clients.</p>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-lowest/50 border-l-2 border-slate-500/30">
+<p class="text-sm text-slate-400 leading-relaxed">Responsible for meeting quarterly sales targets and maintaining customer relationships.</p>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-lowest/50 border-l-2 border-slate-500/30 opacity-50">
+<p class="text-sm text-slate-400 leading-relaxed">Implemented a new filing system that saved the office time and resources.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Improved Side -->
+<div class="p-8 bg-surface-container-high/30 relative">
+<!-- Ghost Overlay for non-upgraded users -->
+<div class="flex items-center gap-2 mb-6 text-primary">
+<span class="material-symbols-outlined text-sm">auto_awesome</span>
+<span class="text-xs font-bold uppercase tracking-widest">AI Intelligence Enhanced</span>
+</div>
+<div class="space-y-8">
+<div class="space-y-4">
+<div class="p-4 rounded-lg bg-primary-container/5 border-l-2 border-primary/60 relative group">
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary text-sm cursor-pointer">content_copy</span>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">
+<span class="text-primary font-bold">Spearheaded</span> a cross-functional engineering department of 45+, delivering 12+ enterprise-grade SaaS solutions and <span class="text-secondary">improving deployment velocity by 34%</span>.
+                                            </p>
+</div>
+<div class="p-4 rounded-lg bg-primary-container/5 border-l-2 border-primary/60 relative group">
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary text-sm cursor-pointer">content_copy</span>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">
+                                                Consistently exceeded quarterly revenue targets by 20%, generating <span class="text-secondary">$4.2M in new business pipeline</span> through strategic account management and executive negotiations.
+                                            </p>
+</div>
+<div class="p-4 rounded-lg bg-primary-container/5 border-l-2 border-primary/60 relative group">
+<div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary text-sm cursor-pointer">content_copy</span>
+</div>
+<p class="text-sm text-on-surface leading-relaxed">
+                                                Architected a scalable operational framework, reducing administrative overhead by 15% and <span class="text-secondary">reclaiming 200+ monthly labor hours</span> for strategic initiatives.
+                                            </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Instant Upgrade CTA Section -->
+<div class="relative overflow-hidden rounded-2xl p-10 group">
+<!-- Background Pattern -->
+<div class="absolute inset-0 bg-primary-container/20 z-0"></div>
+<div class="absolute -right-20 -top-20 w-96 h-96 bg-primary/20 rounded-full blur-[120px] z-0"></div>
+<div class="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+<div class="max-w-md">
+<h2 class="text-2xl font-bold font-headline text-on-surface">Unlock Full AI Optimization</h2>
+<p class="text-tertiary mt-3 leading-relaxed">Get unlimited AI bullet point generation, custom tailoring for every job application, and executive-level keyword density analysis.</p>
+<div class="mt-6 flex gap-4 text-sm font-bold text-primary">
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">check_circle</span> Unlimited Exports</span>
+<span class="flex items-center gap-1"><span class="material-symbols-outlined text-base">check_circle</span> Cover Letter AI</span>
+</div>
+</div>
+<button class="whitespace-now8 shadow-xl shadow-primary-container/20 px-8 py-4 bg-primary-container text-on-primary-container rounded-lg font-extrabold text-lg flex items-center gap-3 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined">bolt</span>
+                                Instant Upgrade
+                            </button>
+</div>
+</div>
+<!-- Trajectory Visual -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-3">trending_up</span>
+<h4 class="text-sm font-bold text-on-surface">Interview Rate</h4>
+<p class="text-2xl font-black text-secondary mt-1">+45%</p>
+<p class="text-[10px] text-tertiary mt-2">Projected Improvement</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-3">visibility</span>
+<h4 class="text-sm font-bold text-on-surface">Recruiter Views</h4>
+<p class="text-2xl font-black text-secondary mt-1">3.2x</p>
+<p class="text-[10px] text-tertiary mt-2">Visibility Multiplier</p>
+</div>
+<div class="bg-surface-container-low p-6 rounded-xl border border-outline-variant/15 flex flex-col items-center text-center">
+<span class="material-symbols-outlined text-primary mb-3">payments</span>
+<h4 class="text-sm font-bold text-on-surface">Salary Bracket</h4>
+<p class="text-2xl font-black text-secondary mt-1">$20k+</p>
+<p class="text-[10px] text-tertiary mt-2">Potential Gain</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- FAB Suppression Applied: No FAB on Analytical Detail Screen -->
+</body></html>

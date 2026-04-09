@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Cognitive Architecture - Smart Profile Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-surface-variant": "#c2c6d6",
+                        "primary-container": "#4d8eff",
+                        "on-tertiary": "#233143",
+                        "primary-fixed": "#d8e2ff",
+                        "on-background": "#dae2fd",
+                        "surface-dim": "#0b1326",
+                        "surface-tint": "#adc6ff",
+                        "on-surface": "#dae2fd",
+                        "on-tertiary-container": "#1c2b3c",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-primary-fixed": "#001a42",
+                        "surface-container": "#171f33",
+                        "error": "#ffb4ab",
+                        "surface-bright": "#31394d",
+                        "secondary-fixed-dim": "#4edea3",
+                        "on-primary-fixed-variant": "#004395",
+                        "outline-variant": "#424754",
+                        "tertiary-fixed-dim": "#b9c8de",
+                        "secondary": "#4edea3",
+                        "on-error-container": "#ffdad6",
+                        "error-container": "#93000a",
+                        "on-error": "#690005",
+                        "outline": "#8c909f",
+                        "surface-container-lowest": "#060e20",
+                        "on-secondary-fixed": "#002113",
+                        "on-tertiary-fixed": "#0d1c2d",
+                        "surface": "#0b1326",
+                        "surface-container-low": "#131b2e",
+                        "background": "#0b1326",
+                        "inverse-primary": "#005ac2",
+                        "inverse-surface": "#dae2fd",
+                        "secondary-container": "#00a572",
+                        "on-secondary": "#003824",
+                        "on-secondary-fixed-variant": "#005236",
+                        "tertiary-container": "#8392a6",
+                        "inverse-on-surface": "#283044",
+                        "primary": "#adc6ff",
+                        "tertiary": "#b9c8de",
+                        "surface-container-highest": "#2d3449",
+                        "on-primary-container": "#00285d",
+                        "surface-container-high": "#222a3d",
+                        "on-primary": "#002e6a",
+                        "on-secondary-container": "#00311f",
+                        "secondary-fixed": "#6ffbbe",
+                        "on-tertiary-fixed-variant": "#39485a",
+                        "tertiary-fixed": "#d4e4fa",
+                        "surface-variant": "#2d3449"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "fontFamily": {
+                        "headline": ["Manrope"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-panel {
+            background: rgba(45, 52, 73, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .ai-pulse {
+            box-shadow: 0 0 15px rgba(173, 198, 255, 0.6);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1326;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #2d3449;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body selection:bg-primary-container selection:text-on-primary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-[#0b1326]/60 backdrop-blur-xl flex justify-between items-center px-8 h-16 w-full">
+<div class="flex items-center gap-4">
+<span class="text-xl font-bold tracking-tighter text-blue-100 font-headline">The Cognitive Architecture</span>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4 text-slate-400">
+<span class="material-symbols-outlined hover:text-blue-200 transition-colors cursor-pointer active:scale-95" data-icon="bolt">bolt</span>
+<span class="material-symbols-outlined hover:text-blue-200 transition-colors cursor-pointer active:scale-95" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined hover:text-blue-200 transition-colors cursor-pointer active:scale-95" data-icon="account_circle">account_circle</span>
+</div>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="fixed left-0 top-0 h-full w-64 z-40 bg-[#0b1326] border-r border-slate-800/20 flex flex-col py-8 px-4 shadow-2xl shadow-black/40">
+<div class="mt-16 mb-8 px-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg overflow-hidden bg-surface-container-high border border-outline-variant/20">
+<img alt="Executive User Profile" class="w-full h-full object-cover" data-alt="professional executive portrait in a modern glass office with cool blue cinematic lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBKwTiFL5xo3TW1-jwHw4mxOCJxW1p2IfUDoDO36xV3OeLLDNzYzvCOFz4DRvltJyqX9PuDkPBnBmSmxK71L555csrmo5pkt_xEQIM9UReWidtYwviTLjCe_wauM4lTxGE_oSN40cWFMwuGetrC_n89Dv4EQVcExOSDpkoVXpO3nbs1BVrD6HvfWQWy8V1PbB-akAtO9Axv5IDXpAdFUWugzhEWttP3yGW0t39tLu_dL6gjsbWekaptW0NcRpq2MZrltDc_RfGJKog"/>
+</div>
+<div>
+<p class="text-sm font-bold font-headline text-on-surface">Executive Coach</p>
+<div class="flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary ai-pulse"></span>
+<p class="text-[10px] text-slate-500 font-medium tracking-wider uppercase">AI Pulse: Active</p>
+</div>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 text-blue-400 border-r-2 border-blue-400 bg-blue-500/5 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+                Dashboard
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/40 hover:text-slate-200 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="alt_route">alt_route</span>
+                Roadmap
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/40 hover:text-slate-200 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="record_voice_over">record_voice_over</span>
+                Interview Studio
+            </a>
+<a class="flex items-center gap-3 px-4 py-3 text-slate-500 hover:bg-slate-800/40 hover:text-slate-200 transition-all duration-300 ease-in-out font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+                Resume Lab
+            </a>
+</nav>
+<div class="mt-auto space-y-1">
+<div class="px-4 py-4 mb-4">
+<button class="w-full bg-primary-container text-on-primary-container py-2.5 rounded-xl text-xs font-bold font-headline hover:brightness-110 transition-all">
+                    Upgrade to Pro
+                </button>
+</div>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+                Settings
+            </a>
+<a class="flex items-center gap-3 px-4 py-2 text-slate-500 hover:text-slate-200 font-inter text-sm font-medium" href="#">
+<span class="material-symbols-outlined" data-icon="help">help</span>
+                Support
+            </a>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="ml-64 pt-24 px-10 pb-12 min-h-screen">
+<header class="mb-10">
+<h1 class="text-4xl font-extrabold font-headline tracking-tight text-on-surface mb-2">Executive Intelligence Console</h1>
+<p class="text-tertiary body-md">Propelling your trajectory toward Lead Solutions Architect roles.</p>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-12 gap-6 auto-rows-fr">
+<!-- Placement Probability Gauge -->
+<div class="col-span-12 lg:col-span-4 bg-surface-container-low rounded-xl p-8 flex flex-col justify-center items-center relative overflow-hidden group">
+<div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-secondary"></div>
+<h3 class="text-on-surface-variant font-headline font-bold text-sm uppercase tracking-widest mb-8">Placement Probability</h3>
+<div class="relative w-48 h-48 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90">
+<circle class="text-surface-container-highest" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-width="12"></circle>
+<circle class="text-primary-container" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" stroke-dasharray="552.92" stroke-dashoffset="176.93" stroke-linecap="round" stroke-width="12"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-5xl font-extrabold font-headline">68%</span>
+<span class="text-[10px] text-secondary font-bold uppercase tracking-tighter">+4% this week</span>
+</div>
+</div>
+<p class="mt-8 text-center text-xs text-on-surface-variant max-w-[200px]">Probability has increased based on recent certification uploads.</p>
+</div>
+<!-- Skill Gap Heatmap -->
+<div class="col-span-12 lg:col-span-8 bg-surface-container rounded-xl p-8 relative">
+<div class="flex justify-between items-center mb-8">
+<h3 class="text-on-surface-variant font-headline font-bold text-sm uppercase tracking-widest">Skill Gap Heatmap</h3>
+<div class="flex gap-2">
+<span class="px-3 py-1 rounded-full bg-surface-container-highest text-[10px] font-bold text-primary tracking-wide">GOOGLE</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-low text-[10px] font-bold text-slate-500 tracking-wide">AMAZON</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-low text-[10px] font-bold text-slate-500 tracking-wide">META</span>
+</div>
+</div>
+<div class="grid grid-cols-5 gap-4">
+<!-- Heatmap Rows -->
+<div class="col-span-1 text-xs text-slate-500 font-medium py-2">System Design</div>
+<div class="col-span-4 h-8 bg-surface-container-highest rounded-lg flex overflow-hidden">
+<div class="w-[85%] bg-primary-container/80 h-full"></div>
+<div class="w-[15%] bg-error/20 h-full"></div>
+</div>
+<div class="col-span-1 text-xs text-slate-500 font-medium py-2">Cloud Arch</div>
+<div class="col-span-4 h-8 bg-surface-container-highest rounded-lg flex overflow-hidden">
+<div class="w-[92%] bg-secondary-container h-full"></div>
+<div class="w-[8%] bg-error/20 h-full"></div>
+</div>
+<div class="col-span-1 text-xs text-slate-500 font-medium py-2">Distributed Systems</div>
+<div class="col-span-4 h-8 bg-surface-container-highest rounded-lg flex overflow-hidden">
+<div class="w-[60%] bg-primary-container/60 h-full"></div>
+<div class="w-[40%] bg-error/30 h-full"></div>
+</div>
+<div class="col-span-1 text-xs text-slate-500 font-medium py-2">Leadership</div>
+<div class="col-span-4 h-8 bg-surface-container-highest rounded-lg flex overflow-hidden">
+<div class="w-[75%] bg-primary-container/70 h-full"></div>
+<div class="w-[25%] bg-error/20 h-full"></div>
+</div>
+</div>
+<div class="mt-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="lightbulb">lightbulb</span>
+<p class="text-xs text-on-surface-variant">Focus on <span class="text-primary font-bold">Distributed Systems</span> to unlock Tier-1 eligibility.</p>
+</div>
+</div>
+<!-- Company Fit Scores Card -->
+<div class="col-span-12 lg:col-span-5 bg-surface-container-low rounded-xl p-8">
+<h3 class="text-on-surface-variant font-headline font-bold text-sm uppercase tracking-widest mb-6">Company Fit Scores</h3>
+<div class="space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="corporate_fare">corporate_fare</span>
+</div>
+<div>
+<p class="text-sm font-bold">Google</p>
+<p class="text-[10px] text-slate-500">L6 Solutions Architect</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xl font-bold font-headline text-secondary">92%</span>
+<p class="text-[10px] text-secondary-container font-bold uppercase">Strong Match</p>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="cloud">cloud</span>
+</div>
+<div>
+<p class="text-sm font-bold">AWS</p>
+<p class="text-[10px] text-slate-500">Principal Cloud Architect</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xl font-bold font-headline text-primary">84%</span>
+<p class="text-[10px] text-primary-container font-bold uppercase">High Fit</p>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-lg bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-primary" data-icon="token">token</span>
+</div>
+<div>
+<p class="text-sm font-bold">Netflix</p>
+<p class="text-[10px] text-slate-500">Senior Software Engineer</p>
+</div>
+</div>
+<div class="text-right">
+<span class="text-xl font-bold font-headline text-tertiary">71%</span>
+<p class="text-[10px] text-slate-500 font-bold uppercase">Emerging Match</p>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Brain & Progress Center -->
+<div class="col-span-12 lg:col-span-7 grid grid-cols-2 gap-6">
+<!-- AI Brain Status -->
+<div class="glass-panel rounded-xl p-6 border border-primary/10 relative overflow-hidden flex flex-col justify-between">
+<div class="flex justify-between items-start">
+<h3 class="text-xs font-bold uppercase tracking-widest text-primary">AI Brain Status</h3>
+<div class="w-2 h-2 rounded-full bg-secondary ai-pulse"></div>
+</div>
+<div class="my-4">
+<p class="text-3xl font-headline font-extrabold text-on-surface">Synchronized</p>
+<p class="text-[10px] text-slate-400 mt-1">Last neural update: 14 mins ago</p>
+</div>
+<div class="flex gap-1 mt-2">
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary rounded-full"></div>
+<div class="h-1 flex-1 bg-primary/20 rounded-full"></div>
+</div>
+</div>
+<!-- XP Progress -->
+<div class="bg-surface-container-high rounded-xl p-6 flex flex-col justify-between">
+<div class="flex justify-between items-center">
+<span class="text-[10px] font-bold text-secondary uppercase tracking-widest">Level 24 Executive</span>
+<span class="text-[10px] font-bold text-slate-400">1,240 / 2,000 XP</span>
+</div>
+<div class="my-4">
+<div class="w-full h-3 bg-surface-container-highest rounded-full overflow-hidden">
+<div class="h-full bg-secondary w-[62%]"></div>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="stars" style="font-variation-settings: 'FILL' 1;">stars</span>
+<p class="text-[10px] text-on-surface-variant">760 XP until <span class="text-secondary">Director Tier</span></p>
+</div>
+</div>
+<!-- Activity Streak -->
+<div class="col-span-2 bg-surface-container-low rounded-xl p-6 flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-400">
+<span class="material-symbols-outlined text-3xl" data-icon="local_fire_department" style="font-variation-settings: 'FILL' 1;">local_fire_department</span>
+</div>
+<div>
+<p class="text-2xl font-extrabold font-headline">14 Day Streak</p>
+<p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">You are in the top 2% of candidates</p>
+</div>
+</div>
+<div class="flex gap-2">
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center text-[10px] font-bold text-secondary">M</div>
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center text-[10px] font-bold text-secondary">T</div>
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center text-[10px] font-bold text-secondary">W</div>
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center text-[10px] font-bold text-secondary">T</div>
+<div class="w-8 h-8 rounded bg-secondary/20 flex items-center justify-center text-[10px] font-bold text-secondary">F</div>
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-slate-500">S</div>
+<div class="w-8 h-8 rounded bg-surface-container-highest flex items-center justify-center text-[10px] font-bold text-slate-500">S</div>
+</div>
+</div>
+</div>
+<!-- Recent Activity Feed -->
+<div class="col-span-12 bg-surface-container rounded-xl p-8">
+<h3 class="text-on-surface-variant font-headline font-bold text-sm uppercase tracking-widest mb-8">AI-Driven Strategic Adjustments</h3>
+<div class="space-y-0">
+<div class="flex gap-6 py-6 border-b border-outline-variant/10">
+<div class="shrink-0 w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-sm" data-icon="psychology">psychology</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-bold">Resume Recalibration</h4>
+<span class="text-[10px] text-slate-500 font-medium">2 hours ago</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">AI refined the 'Executive Leadership' section of your CV to better align with Amazon's 16 Leadership Principles. Probability increased by <span class="text-secondary font-bold">+1.2%</span>.</p>
+</div>
+</div>
+<div class="flex gap-6 py-6 border-b border-outline-variant/10">
+<div class="shrink-0 w-10 h-10 rounded-full bg-secondary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-secondary text-sm" data-icon="monitoring">monitoring</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-bold">Market Intelligence Shift</h4>
+<span class="text-[10px] text-slate-500 font-medium">6 hours ago</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Detected 14 new 'Staff Engineer' openings in the Seattle area. Matching your profile with 4 high-priority leads.</p>
+</div>
+</div>
+<div class="flex gap-6 py-6">
+<div class="shrink-0 w-10 h-10 rounded-full bg-tertiary/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-tertiary text-sm" data-icon="auto_awesome">auto_awesome</span>
+</div>
+<div class="flex-1">
+<div class="flex justify-between mb-1">
+<h4 class="text-sm font-bold">Interview Insight Generated</h4>
+<span class="text-[10px] text-slate-500 font-medium">Yesterday</span>
+</div>
+<p class="text-xs text-on-surface-variant leading-relaxed">Custom behavioral response bank generated for your upcoming technical screening with Google. Focus on <span class="text-primary underline">Distributed Systems Fault Tolerance</span>.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Background Decoration -->
+<div class="fixed top-0 left-0 w-full h-full -z-10 pointer-events-none overflow-hidden">
+<div class="absolute -top-[20%] -left-[10%] w-[60%] h-[60%] bg-primary/5 rounded-full blur-[120px]"></div>
+<div class="absolute top-[40%] -right-[10%] w-[50%] h-[50%] bg-secondary/5 rounded-full blur-[120px]"></div>
+</div>
+</body></html>
