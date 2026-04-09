@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: mentorshipp-node-api
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
+        fromDatabase:
+          name: mentorshipp-db
+          property: connectionString
+      - key: AI_SERVICE_URL
+        value: https://mentorshipp-python-api.onrender.com
+
+databases:
+  - name: mentorshipp-db
+    plan: free
