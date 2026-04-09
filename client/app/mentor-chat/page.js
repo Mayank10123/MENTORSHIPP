@@ -25,7 +25,7 @@ export default function MentorChat() {
   }, [messages]);
 
   const handleSendMessage = async () => {
-    handleSendMessageWithText(input);
+    await handleSendMessageWithText(input);
     setInput('');
   };
 
