@@ -9,7 +9,7 @@ export default function MentorChat() {
       id: 1,
       type: 'mentor',
       text: "Hey! I'm your AI Mentor. I've been tracking your progress and I want to help you succeed. What would you like to focus on today?",
-      timestamp: new Date(),
+      timestamp: null,
     },
   ]);
   const [input, setInput] = useState('');
