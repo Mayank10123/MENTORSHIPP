@@ -31,9 +31,10 @@ export default function CompanyIntelligence() {
         }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         setIntelligence(data);
+      } else {
+        setIntelligence(null);
       }
     } catch (error) {
       console.error('Error:', error);

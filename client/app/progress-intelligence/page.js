@@ -37,7 +37,6 @@ export default function ProgressIntelligence() {
       console.log('Fetching prediction from backend...');
       const data = await safeApiFetch(`${API_URLS.PYTHON}/progress/predict`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: 'demo-user',
           tasks_completed: parseInt(tasksCompleted),
@@ -47,10 +46,7 @@ export default function ProgressIntelligence() {
         }),
       });
 
-      console.log('Backend response status:', response.status);
-
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         console.log('Prediction data:', data);
         setPrediction(data);
       }
@@ -58,7 +54,6 @@ export default function ProgressIntelligence() {
       // Get risk analysis
       const riskData = await safeApiFetch(`${API_URLS.PYTHON}/risk/detect`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_id: 'demo-user',
           tasks_completed: parseInt(tasksCompleted),
@@ -68,10 +63,7 @@ export default function ProgressIntelligence() {
         }),
       });
 
-      console.log('Risk response status:', riskResponse.status);
-
-      if (riskResponse.ok) {
-        const riskData = await riskResponse.json();
+      if (riskData) {
         console.log('Risk data:', riskData);
         setRisks(riskData);
       }
