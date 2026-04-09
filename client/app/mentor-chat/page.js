@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function MentorChat() {
   const [messages, setMessages] = useState([
@@ -70,21 +71,17 @@ export default function MentorChat() {
 
     try {
       console.log('Fetching from backend...');
-      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/mentor/context`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_input: messageText,
           context: 'user is preparing for interviews and DSA',
         }),
       });
 
-      console.log('Backend response status:', response.status);
+      console.log('Backend response data:', data);
 
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Backend response data:', data);
-        
+      if (data) {
         // Build message from Groq response
         let mentorText = data.suggestion || generateMentorResponse(messageText);
         

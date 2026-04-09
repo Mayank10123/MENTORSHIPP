@@ -35,7 +35,7 @@ export default function ProgressIntelligence() {
     // Then try to fetch from backend
     try {
       console.log('Fetching prediction from backend...');
-      const response = await fetch('http://127.0.0.1:8000/progress/predict', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/progress/predict`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -56,7 +56,7 @@ export default function ProgressIntelligence() {
       }
 
       // Get risk analysis
-      const riskResponse = await fetch('http://127.0.0.1:8000/risk/detect', {
+      const riskData = await safeApiFetch(`${API_URLS.PYTHON}/risk/detect`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

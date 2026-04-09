@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function ProfileAnalyzer() {
   const [cgpa, setCgpa] = useState('');
@@ -20,7 +21,7 @@ export default function ProfileAnalyzer() {
     setLoading(true);
     try {
       const skillArray = skills.split(',').map(s => s.trim());
-      const response = await fetch('http://127.0.0.1:8000/analyze/profile', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/analyze/profile`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function ResumeLab() {
   const [resumeText, setResumeText] = useState('');
@@ -69,13 +70,12 @@ export default function ResumeLab() {
     if (!resumeText.trim()) return;
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/evaluate/resume', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/evaluate/resume`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resume_text: resumeText }),
       });
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         setResult(data);
       }
     } catch (err) {

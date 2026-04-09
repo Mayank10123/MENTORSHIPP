@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function Roadmaps() {
   const [mode, setMode] = useState(null); // 'ai', 'roadmaps', 'practices'
@@ -59,7 +60,7 @@ export default function Roadmaps() {
       roadmaps.map(name => ({
         title: formatTitle(name),
         filename: name,
-        path: `http://127.0.0.1:5000/pdfs/roadmaps/${name}.pdf`
+        path: `/pdfs/roadmaps/${name}.pdf`
       }))
     );
 
@@ -67,7 +68,7 @@ export default function Roadmaps() {
       practices.map(name => ({
         title: `${formatTitle(name)} Best Practices`,
         filename: name,
-        path: `http://127.0.0.1:5000/pdfs/best-practices/${name}.pdf`
+        path: `/pdfs/best-practices/${name}.pdf`
       }))
     );
   }, []);
@@ -84,13 +85,11 @@ export default function Roadmaps() {
     if (!role.trim()) return;
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/planner/generate', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/planner/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ target_role: role, current_level: 'Mid-Level', weeks: 8 }),
       });
-      if (response.ok) {
-        const data = await response.json();
+      if (data) {
         setRoadmapData(data);
       } else {
         throw new Error('API error');

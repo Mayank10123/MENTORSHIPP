@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function Dashboard() {
   const [nudge, setNudge] = useState(null);
@@ -8,18 +9,12 @@ export default function Dashboard() {
   useEffect(() => {
     // Fetch mentor nudge from API if backend is available
     const fetchNudge = async () => {
-      try {
-        const response = await fetch('http://127.0.0.1:8000/mentor/nudge', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ streak: 14, xp: 1240, risk_level: 'Low' }),
-        });
-        if (response.ok) {
-          const data = await response.json();
-          setNudge(data);
-        }
-      } catch (err) {
-        console.log('Backend not available, using demo data');
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/mentor/nudge`, {
+        method: 'POST',
+        body: JSON.stringify({ streak: 14, xp: 1240, risk_level: 'Low' }),
+      });
+      if (data) {
+        setNudge(data);
       }
     };
     fetchNudge();

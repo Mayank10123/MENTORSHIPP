@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 const companies = [
   { name: 'Google', logo: '🔷', difficulty: 9 },
@@ -22,9 +23,8 @@ export default function CompanyIntelligence() {
     setSelectedCompany(company);
     setLoading(true);
     try {
-      const response = await fetch('http://127.0.0.1:8000/intelligence/company', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/intelligence/company`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           company_name: company,
           target_role: targetRole,

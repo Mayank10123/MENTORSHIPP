@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function Interview() {
   const [stage, setStage] = useState('mode-selection'); // mode-selection, setup, interview, results
@@ -157,27 +158,28 @@ Requirements:
 
 Respond ONLY as JSON: {"questions": ["Q1?", "Q2?", ...]}`;
 
-      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/mentor/context`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_input: 'Generate interview questions',
           context: prompt,
         }),
       });
 
-      const data = await response.json();
-      
-      try {
-        let text = data.suggestion || '';
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) {
-          const parsed = JSON.parse(match[0]);
-          setGeneratedQuestions(parsed.questions || []);
-        } else {
+      if (data) {
+        try {
+          let text = data.suggestion || '';
+          const match = text.match(/\{[\s\S]*\}/);
+          if (match) {
+            const parsed = JSON.parse(match[0]);
+            setGeneratedQuestions(parsed.questions || []);
+          } else {
+            setGeneratedQuestions(getDefaultQuestions());
+          }
+        } catch (e) {
           setGeneratedQuestions(getDefaultQuestions());
         }
-      } catch (e) {
+      } else {
         setGeneratedQuestions(getDefaultQuestions());
       }
     } catch (error) {
@@ -218,25 +220,27 @@ Provide detailed evaluation as JSON:
   "final_remarks": "Summary..."
 }`;
 
-      const response = await fetch('http://127.0.0.1:8000/mentor/context', {
+      const data = await safeApiFetch(`${API_URLS.PYTHON}/mentor/context`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user_input: 'Evaluate interview',
           context: prompt,
         }),
       });
 
-      const data = await response.json();
-      try {
-        let text = data.suggestion || '';
-        const match = text.match(/\{[\s\S]*\}/);
-        if (match) {
-          setFinalEvaluation(JSON.parse(match[0]));
-        } else {
+      if (data) {
+        try {
+          let text = data.suggestion || '';
+          const match = text.match(/\{[\s\S]*\}/);
+          if (match) {
+            setFinalEvaluation(JSON.parse(match[0]));
+          } else {
+            setFinalEvaluation(getDefaultEvaluation());
+          }
+        } catch (e) {
           setFinalEvaluation(getDefaultEvaluation());
         }
-      } catch (e) {
+      } else {
         setFinalEvaluation(getDefaultEvaluation());
       }
     } catch (error) {
