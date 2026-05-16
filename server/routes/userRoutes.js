@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/User');
+const Progress = require('../models/Progress');
 const jwt = require('jsonwebtoken');
 
 // Signup endpoint
@@ -119,6 +120,157 @@ router.get('/me', async (req, res) => {
         res.json(user);
     } catch (error) {
         res.status(401).json({ message: 'Invalid token' });
+    }
+});
+
+// GET /profile by email
+router.get('/profile', async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            // Self-healing: create a default user on-demand if they signed up with Firebase
+            user = new User({
+                name: email.split('@')[0],
+                email: email,
+                currentRole: 'Mid-Level Engineer',
+                targetRole: 'Senior Solutions Architect',
+                yearsExperience: 8,
+                placementProbability: 0,
+                skills: {
+                    'System Design': 0,
+                    'Cloud Arch': 0,
+                    'Distributed Systems': 0,
+                    'Leadership': 0
+                },
+                companyFitScores: {
+                    'Google': 0,
+                    'AWS': 0,
+                    'Netflix': 0
+                },
+                streak: 0,
+                totalXP: 0
+            });
+            await user.save();
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// PUT /profile by email
+router.put('/profile', async (req, res) => {
+    try {
+        const { email } = req.query;
+        const updateData = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const user = await User.findOneAndUpdate({ email }, updateData, { new: true, runValidators: true });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// GET /progress by email
+router.get('/progress', async (req, res) => {
+    try {
+        const { email } = req.query;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        let user = await User.findOne({ email });
+        if (!user) {
+            // Auto-create user first with 0 values
+            user = new User({
+                name: email.split('@')[0],
+                email: email,
+                currentRole: 'Mid-Level Engineer',
+                targetRole: 'Senior Solutions Architect',
+                yearsExperience: 8,
+                placementProbability: 0,
+                skills: {
+                    'System Design': 0,
+                    'Cloud Arch': 0,
+                    'Distributed Systems': 0,
+                    'Leadership': 0
+                },
+                companyFitScores: {
+                    'Google': 0,
+                    'AWS': 0,
+                    'Netflix': 0
+                },
+                streak: 0,
+                totalXP: 0
+            });
+            await user.save();
+        }
+
+        let progress = await Progress.findOne({ userId: user._id });
+        if (!progress) {
+            // Self-healing: create an empty progress document for a new onboarding user
+            progress = new Progress({
+                userId: user._id,
+                roadmapData: null,
+                currentWeekTasks: [
+                    { taskId: 't1', title: 'Setup Career Focus Area', status: 'pending', topic: 'Orientation' },
+                    { taskId: 't2', title: 'Generate AI Guided Roadmap', status: 'pending', topic: 'Orientation' },
+                    { taskId: 't3', title: 'Upload Initial Resume Draft', status: 'pending', topic: 'Orientation' }
+                ],
+                riskLevel: 'safe',
+                mentorNudges: [],
+                interviewHistory: [],
+                recentActivities: []
+            });
+            await progress.save();
+        }
+
+        res.json(progress);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+});
+
+// PUT /progress by email
+router.put('/progress', async (req, res) => {
+    try {
+        const { email } = req.query;
+        const updateData = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const progress = await Progress.findOneAndUpdate(
+            { userId: user._id },
+            updateData,
+            { new: true, runValidators: true }
+        );
+
+        if (!progress) {
+            return res.status(404).json({ message: 'Progress not found' });
+        }
+
+        res.json(progress);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 });
 

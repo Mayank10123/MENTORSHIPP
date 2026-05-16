@@ -81,9 +81,38 @@ export default function Roadmaps() {
     pr.title.toLowerCase().includes(searchPractices.toLowerCase())
   );
 
+  useEffect(() => {
+    const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+    const fetchPersistedRoadmap = async () => {
+      try {
+        const data = await safeApiFetch(`${API_URLS.NODE}/api/user/progress?email=${email}`);
+        if (data && data.roadmapData) {
+          setRoadmapData(data.roadmapData);
+          setMode('ai'); // Switch to AI tab to display active roadmap
+        }
+      } catch (err) {
+        console.error('Failed to load persisted roadmap:', err);
+      }
+    };
+    fetchPersistedRoadmap();
+  }, []);
+
+  const saveRoadmapToBackend = async (roadmap) => {
+    try {
+      const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+      await safeApiFetch(`${API_URLS.NODE}/api/user/progress?email=${email}`, {
+        method: 'PUT',
+        body: JSON.stringify({ roadmapData: roadmap })
+      });
+    } catch (err) {
+      console.error('Failed to persist roadmap:', err);
+    }
+  };
+
   const generateAIRoadmap = async () => {
     if (!role.trim()) return;
     setLoading(true);
+    let generatedRoadmap = null;
     try {
       const data = await safeApiFetch(`${API_URLS.PYTHON}/planner/generate`, {
         method: 'POST',
@@ -91,11 +120,12 @@ export default function Roadmaps() {
       });
       if (data) {
         setRoadmapData(data);
+        generatedRoadmap = data;
       } else {
         throw new Error('API error');
       }
     } catch (err) {
-      setRoadmapData({
+      const fallback = {
         weeks: [
           { milestone: 'Learn Fundamentals', tasks: ['Study Core Concepts', 'Practice Basics', 'Build Mini Projects'] },
           { milestone: 'Master Key Skills', tasks: ['Advanced Topics', 'Real-world Practice', 'Code Review'] },
@@ -106,9 +136,14 @@ export default function Roadmaps() {
           { milestone: 'Portfolio Projects', tasks: ['Build Real Project', 'Open Source', 'Document Code'] },
           { milestone: 'Final Preparation', tasks: ['Review Weak Areas', 'Final Mocks', 'Company Research'] },
         ],
-      });
+      };
+      setRoadmapData(fallback);
+      generatedRoadmap = fallback;
     } finally {
       setLoading(false);
+      if (generatedRoadmap) {
+        await saveRoadmapToBackend(generatedRoadmap);
+      }
     }
   };
 

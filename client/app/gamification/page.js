@@ -1,25 +1,50 @@
 'use client';
 
-import { useState } from 'react';
-
-const leaderboardData = [
-  { rank: 1, name: 'Alex Chen', xp: 4500, level: 'Elite', streak: 45, avatar: '👨‍💻' },
-  { rank: 2, name: 'Sarah Johnson', xp: 4200, level: 'Pro', streak: 38, avatar: '👩‍💻' },
-  { rank: 3, name: 'Priya Sharma', xp: 3950, level: 'Advanced', streak: 32, avatar: '👩‍🎓' },
-  { rank: 4, name: 'You', xp: 2850, level: 'Intermediate', streak: 12, avatar: '⭐', isUser: true },
-  { rank: 5, name: 'James Cooper', xp: 2600, level: 'Intermediate', streak: 18, avatar: '🧑‍💼' },
-  { rank: 6, name: 'Lisa Wang', xp: 2300, level: 'Beginner', streak: 8, avatar: '👩‍💻' },
-];
+import { useState, useEffect } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function Gamification() {
   const [activeTab, setActiveTab] = useState('leaderboard');
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+    const fetchProfile = async () => {
+      try {
+        const data = await safeApiFetch(`${API_URLS.NODE}/api/user/profile?email=${email}`);
+        if (data) {
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch gamification profile:', err);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const userXP = profile ? profile.totalXP : 0;
+  const userStreak = profile ? profile.streak : 0;
+
+  const level = Math.floor(userXP / 500) + 1;
+  const levelNames = ['Beginner', 'Intermediate', 'Advanced', 'Pro', 'Elite'];
+  const levelName = levelNames[Math.min(level - 1, 4)];
+  const nextLevelXp = level * 500;
 
   const userStats = {
-    xp: 2850,
-    level: 'Intermediate',
-    streak: 12,
-    nextLevelXp: 3500,
+    xp: userXP,
+    level: levelName,
+    streak: userStreak,
+    nextLevelXp: nextLevelXp,
   };
+
+  const leaderboardData = [
+    { rank: 1, name: 'Alex Chen', xp: 4500, level: 'Elite', streak: 45, avatar: '👨‍💻' },
+    { rank: 2, name: 'Sarah Johnson', xp: 4200, level: 'Pro', streak: 38, avatar: '👩‍💻' },
+    { rank: 3, name: 'Priya Sharma', xp: 3950, level: 'Advanced', streak: 32, avatar: '👩‍🎓' },
+    { rank: 4, name: profile ? profile.name : 'You', xp: userXP, level: levelName, streak: userStreak, avatar: '⭐', isUser: true },
+    { rank: 5, name: 'James Cooper', xp: 2600, level: 'Intermediate', streak: 18, avatar: '🧑‍💼' },
+    { rank: 6, name: 'Lisa Wang', xp: 2300, level: 'Beginner', streak: 8, avatar: '👩‍💻' },
+  ];
 
   return (
     <>
@@ -147,11 +172,11 @@ export default function Gamification() {
             {activeTab === 'levels' && (
               <div className="space-y-6">
                 {[
-                  { level: 'Beginner', range: '0-1000 XP', color: 'from-green-400 to-emerald-500', current: false },
-                  { level: 'Intermediate', range: '1000-3000 XP', color: 'from-blue-400 to-cyan-500', current: true },
-                  { level: 'Advanced', range: '3000-6000 XP', color: 'from-purple-400 to-pink-500', current: false },
-                  { level: 'Pro', range: '6000-10000 XP', color: 'from-orange-400 to-red-500', current: false },
-                  { level: 'Elite', range: '10000+ XP', color: 'from-yellow-400 to-orange-500', current: false },
+                  { level: 'Beginner', range: '0-500 XP', color: 'from-green-400 to-emerald-500', current: userStats.level === 'Beginner' },
+                  { level: 'Intermediate', range: '500-1000 XP', color: 'from-blue-400 to-cyan-500', current: userStats.level === 'Intermediate' },
+                  { level: 'Advanced', range: '1000-1500 XP', color: 'from-purple-400 to-pink-500', current: userStats.level === 'Advanced' },
+                  { level: 'Pro', range: '1500-2000 XP', color: 'from-orange-400 to-red-500', current: userStats.level === 'Pro' },
+                  { level: 'Elite', range: '2000+ XP', color: 'from-yellow-400 to-orange-500', current: userStats.level === 'Elite' },
                 ].map((item, idx) => (
                   <div key={idx} className={`p-6 rounded-lg border ${item.current ? 'bg-[#4edea3]/10 border-[#4edea3]/40' : 'bg-[#000000] border-slate-700'}`}>
                     <div className="flex items-center justify-between mb-3">
@@ -163,7 +188,7 @@ export default function Gamification() {
                     </div>
 
                     <div className="w-full bg-[#000000] rounded-full h-2 overflow-hidden">
-                      <div style={{ width: item.current ? '85%' : '0%' }} className={`h-full bg-gradient-to-r ${item.color}`}></div>
+                      <div style={{ width: item.current ? `${Math.min(((userStats.xp % 500) / 500) * 100, 100)}%` : idx < levelNames.indexOf(userStats.level) ? '100%' : '0%' }} className={`h-full bg-gradient-to-r ${item.color}`}></div>
                     </div>
                   </div>
                 ))}

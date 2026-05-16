@@ -4,32 +4,77 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function Profile() {
   const [profile, setProfile] = useState({ name: '', email: '', currentRole: '', targetRole: '', yearsExperience: '' });
   const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    const name = localStorage.getItem('userName') || 'User';
-    const email = localStorage.getItem('userEmail') || '';
-    const currentRole = localStorage.getItem('currentRole') || 'Mid-Level Engineer';
-    const targetRole = localStorage.getItem('targetRole') || 'Senior Architect';
-    const yearsExperience = localStorage.getItem('yearsExperience') || '8';
-    setProfile({ name, email, currentRole, targetRole, yearsExperience });
+    const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+    
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        const data = await safeApiFetch(`${API_URLS.NODE}/api/user/profile?email=${email}`);
+        if (data) {
+          setProfile({
+            name: data.name || '',
+            email: data.email || email,
+            currentRole: data.currentRole || 'Mid-Level Engineer',
+            targetRole: data.targetRole || 'Senior Architect',
+            yearsExperience: data.yearsExperience || '8'
+          });
+        } else {
+          // Fallback to local storage if API is down
+          const name = localStorage.getItem('userName') || 'User';
+          const currentRole = localStorage.getItem('currentRole') || 'Mid-Level Engineer';
+          const targetRole = localStorage.getItem('targetRole') || 'Senior Architect';
+          const yearsExperience = localStorage.getItem('yearsExperience') || '8';
+          setProfile({ name, email, currentRole, targetRole, yearsExperience });
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
   }, []);
 
   const handleChange = (e) => {
     setProfile({ ...profile, [e.target.name]: e.target.value });
   };
 
-  const handleSave = () => {
-    localStorage.setItem('userName', profile.name);
-    localStorage.setItem('userEmail', profile.email);
-    localStorage.setItem('currentRole', profile.currentRole);
-    localStorage.setItem('targetRole', profile.targetRole);
-    localStorage.setItem('yearsExperience', profile.yearsExperience);
-    setEditing(false);
+  const handleSave = async () => {
+    try {
+      const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+      
+      // Update in backend
+      const updated = await safeApiFetch(`${API_URLS.NODE}/api/user/profile?email=${email}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+          name: profile.name,
+          currentRole: profile.currentRole,
+          targetRole: profile.targetRole,
+          yearsExperience: parseInt(profile.yearsExperience) || 0
+        })
+      });
+
+      // Update in local storage
+      localStorage.setItem('userName', profile.name);
+      localStorage.setItem('userEmail', profile.email);
+      localStorage.setItem('currentRole', profile.currentRole);
+      localStorage.setItem('targetRole', profile.targetRole);
+      localStorage.setItem('yearsExperience', profile.yearsExperience);
+      
+      setEditing(false);
+    } catch (err) {
+      console.error('Failed to save profile:', err);
+    }
   };
 
   const handleLogout = async () => {

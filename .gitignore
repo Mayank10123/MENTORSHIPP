@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 venv/
+.venv/
+
 __pycache__/
 *.pyc
 .Python
@@ -19,6 +21,7 @@ yarn.lock
 .env
 .env.local
 .env.*.local
+ai_service/.env
 
 # IDE
 .vscode/

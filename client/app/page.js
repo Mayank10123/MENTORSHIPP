@@ -5,9 +5,38 @@ import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function Dashboard() {
   const [nudge, setNudge] = useState(null);
+  const [profile, setProfile] = useState(null);
+  const [progress, setProgress] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Fetch mentor nudge from API if backend is available
+    const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+
+    // Fetch dashboard data dynamically
+    const fetchDashboardData = async () => {
+      try {
+        setLoading(true);
+        // Fetch profile
+        const profileData = await safeApiFetch(`${API_URLS.NODE}/api/user/profile?email=${email}`);
+        if (profileData) {
+          setProfile(profileData);
+        }
+
+        // Fetch progress
+        const progressData = await safeApiFetch(`${API_URLS.NODE}/api/user/progress?email=${email}`);
+        if (progressData) {
+          setProgress(progressData);
+        }
+      } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchDashboardData();
+
+    // Fetch mentor nudge from python API
     const fetchNudge = async () => {
       const data = await safeApiFetch(`${API_URLS.PYTHON}/mentor/nudge`, {
         method: 'POST',
@@ -20,13 +49,52 @@ export default function Dashboard() {
     fetchNudge();
   }, []);
 
+  // Graceful fallbacks for local prototyping
+  const userProfile = profile || {
+    name: 'New Candidate',
+    email: 'newcandidate@example.com',
+    currentRole: 'Software Engineer',
+    targetRole: 'Senior Solutions Architect',
+    yearsExperience: 1,
+    placementProbability: 0,
+    skills: {
+      'System Design': 0,
+      'Cloud Arch': 0,
+      'Distributed Systems': 0,
+      'Leadership': 0
+    },
+    companyFitScores: {
+      'Google': 0,
+      'AWS': 0,
+      'Netflix': 0
+    },
+    streak: 0,
+    totalXP: 0,
+    placementProbabilityChange: 0
+  };
+
+  const userProgress = progress || {
+    riskLevel: 'safe',
+    recentActivities: []
+  };
+
+  const strokeDashoffset = 552.92 * (1 - userProfile.placementProbability / 100);
+  const xpMax = 2000;
+  const xpPercent = Math.min((userProfile.totalXP / xpMax) * 100, 100);
+  const xpNeeded = Math.max(xpMax - userProfile.totalXP, 0);
+  const level = Math.floor(userProfile.totalXP / 500) + 1; // Derived level
+
+  const weeklyChange = userProfile.placementProbabilityChange !== undefined ? userProfile.placementProbabilityChange : 0;
+  const changeColor = weeklyChange > 0 ? 'text-[#4edea3]' : weeklyChange < 0 ? 'text-red-400' : 'text-slate-500';
+  const changeText = weeklyChange >= 0 ? `+${weeklyChange}%` : `${weeklyChange}%`;
+
   return (
     <>
       <header className="mb-10">
         <h1 className="text-4xl font-extrabold font-headline tracking-tight text-[#B9B9B9] mb-2">Executive Intelligence Console</h1>
-        <p className="text-[#b9c8de] body-md">Propelling your trajectory toward Lead Solutions Architect roles.</p>
+        <p className="text-[#b9c8de] body-md">Propelling your trajectory toward {userProfile.targetRole} roles.</p>
       </header>
-
+ 
       <div className="grid grid-cols-12 gap-6 auto-rows-fr">
         {/* Placement Probability Gauge */}
         <div className="col-span-12 lg:col-span-4 bg-[#000000] rounded-xl p-8 flex flex-col justify-center items-center relative overflow-hidden group">
@@ -35,11 +103,11 @@ export default function Dashboard() {
           <div className="relative w-48 h-48 flex items-center justify-center">
             <svg className="w-full h-full -rotate-90">
               <circle className="text-[#2d3449]" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" strokeWidth="12"></circle>
-              <circle className="text-[#4d8eff]" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" strokeDasharray="552.92" strokeDashoffset="176.93" strokeLinecap="round" strokeWidth="12"></circle>
+              <circle className="text-[#4d8eff]" cx="96" cy="96" fill="transparent" r="88" stroke="currentColor" strokeDasharray="552.92" strokeDashoffset={strokeDashoffset} strokeLinecap="round" strokeWidth="12"></circle>
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-5xl font-extrabold font-headline text-[#B9B9B9]">68%</span>
-              <span className="text-[10px] text-[#4edea3] font-bold uppercase tracking-tighter">+4% this week</span>
+              <span className="text-5xl font-extrabold font-headline text-[#B9B9B9]">{userProfile.placementProbability}%</span>
+              <span className={`text-[10px] ${changeColor} font-bold uppercase tracking-tighter`}>{changeText} this week</span>
             </div>
           </div>
           <p className="mt-8 text-center text-xs text-[#c2c6d6] max-w-[200px]">Probability has increased based on recent certification uploads.</p>
@@ -55,30 +123,16 @@ export default function Dashboard() {
               <span className="px-3 py-1 rounded-full bg-[#000000] text-[10px] font-bold text-slate-500 tracking-wide">META</span>
             </div>
           </div>
-          <div className="grid grid-cols-5 gap-4">
-            <div className="col-span-1 text-xs text-slate-500 font-medium py-2">System Design</div>
-            <div className="col-span-4 h-8 bg-[#2d3449] rounded-lg flex overflow-hidden">
-              <div className="w-[85%] bg-[#4d8eff]/80 h-full"></div>
-              <div className="w-[15%] bg-red-500/20 h-full"></div>
-            </div>
-
-            <div className="col-span-1 text-xs text-slate-500 font-medium py-2">Cloud Arch</div>
-            <div className="col-span-4 h-8 bg-[#2d3449] rounded-lg flex overflow-hidden">
-              <div className="w-[92%] bg-[#4edea3] h-full"></div>
-              <div className="w-[8%] bg-red-500/20 h-full"></div>
-            </div>
-
-            <div className="col-span-1 text-xs text-slate-500 font-medium py-2">Distributed Systems</div>
-            <div className="col-span-4 h-8 bg-[#2d3449] rounded-lg flex overflow-hidden">
-              <div className="w-[60%] bg-[#4d8eff]/60 h-full"></div>
-              <div className="w-[40%] bg-red-500/30 h-full"></div>
-            </div>
-
-            <div className="col-span-1 text-xs text-slate-500 font-medium py-2">Leadership</div>
-            <div className="col-span-4 h-8 bg-[#2d3449] rounded-lg flex overflow-hidden">
-              <div className="w-[75%] bg-[#4d8eff]/70 h-full"></div>
-              <div className="w-[25%] bg-red-500/20 h-full"></div>
-            </div>
+          <div className="space-y-4">
+            {Object.entries(userProfile.skills || {}).map(([skill, val]) => (
+              <div key={skill} className="grid grid-cols-5 gap-4 items-center">
+                <div className="col-span-1 text-xs text-slate-500 font-medium py-2">{skill}</div>
+                <div className="col-span-4 h-8 bg-[#2d3449] rounded-lg flex overflow-hidden">
+                  <div style={{ width: `${val}%` }} className="bg-[#4d8eff]/80 h-full"></div>
+                  <div style={{ width: `${100 - val}%` }} className="bg-red-500/20 h-full"></div>
+                </div>
+              </div>
+            ))}
           </div>
           <div className="mt-6 flex items-center gap-2">
             <span className="material-symbols-outlined text-[#adc6ff] text-sm">lightbulb</span>
@@ -90,27 +144,40 @@ export default function Dashboard() {
         <div className="col-span-12 lg:col-span-5 bg-[#000000] rounded-xl p-8">
           <h3 className="text-[#c2c6d6] font-headline font-bold text-sm uppercase tracking-widest mb-6">Company Fit Scores</h3>
           <div className="space-y-6">
-            {[
-              { company: 'Google', role: 'L6 Solutions Architect', score: '92%', label: 'Strong Match', color: 'text-[#4edea3]' },
-              { company: 'AWS', role: 'Principal Cloud Architect', score: '84%', label: 'High Fit', color: 'text-[#adc6ff]' },
-              { company: 'Netflix', role: 'Senior Software Engineer', score: '71%', label: 'Emerging Match', color: 'text-[#b9c8de]' },
-            ].map((item, idx) => (
-              <div key={idx} className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="w-10 h-10 rounded-lg bg-[#222a3d] flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[#adc6ff]">corporate_fare</span>
+            {Object.entries(userProfile.companyFitScores || {}).map(([company, score]) => {
+              let label = 'Emerging Match';
+              let color = 'text-[#b9c8de]';
+              if (score >= 90) {
+                label = 'Strong Match';
+                color = 'text-[#4edea3]';
+              } else if (score >= 80) {
+                label = 'High Fit';
+                color = 'text-[#adc6ff]';
+              }
+              
+              let role = 'Senior Developer';
+              if (company === 'Google') role = 'L6 Solutions Architect';
+              if (company === 'AWS') role = 'Principal Cloud Architect';
+              if (company === 'Netflix') role = 'Senior Software Engineer';
+
+              return (
+                <div key={company} className="flex items-center justify-between">
+                  <div className="flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-[#222a3d] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-[#adc6ff]">corporate_fare</span>
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-[#B9B9B9]">{company}</p>
+                      <p className="text-[10px] text-slate-500">{role}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="text-sm font-bold text-[#B9B9B9]">{item.company}</p>
-                    <p className="text-[10px] text-slate-500">{item.role}</p>
+                  <div className="text-right">
+                    <span className={`text-xl font-bold font-headline ${color}`}>{score}%</span>
+                    <p className="text-[10px] text-slate-400 font-bold uppercase">{label}</p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <span className={`text-xl font-bold font-headline ${item.color}`}>{item.score}</span>
-                  <p className="text-[10px] text-slate-400 font-bold uppercase">{item.label}</p>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
@@ -126,26 +193,26 @@ export default function Dashboard() {
               <p className="text-[10px] text-slate-400 mt-1">Last neural update: 14 mins ago</p>
             </div>
             <div className="flex gap-1 mt-2">
-              <div className="h-1 flex-1 bg-[#adc6ff] rounded-full"></div>
-              <div className="h-1 flex-1 bg-[#adc6ff] rounded-full"></div>
-              <div className="h-1 flex-1 bg-[#adc6ff] rounded-full"></div>
-              <div className="h-1 flex-1 bg-[#adc6ff]/20 rounded-full"></div>
+              <div className={`h-1 flex-1 rounded-full ${userProfile.streak >= 1 ? 'bg-[#adc6ff]' : 'bg-[#adc6ff]/20'}`}></div>
+              <div className={`h-1 flex-1 rounded-full ${userProfile.streak >= 3 ? 'bg-[#adc6ff]' : 'bg-[#adc6ff]/20'}`}></div>
+              <div className={`h-1 flex-1 rounded-full ${userProfile.streak >= 7 ? 'bg-[#adc6ff]' : 'bg-[#adc6ff]/20'}`}></div>
+              <div className={`h-1 flex-1 rounded-full ${userProfile.streak >= 14 ? 'bg-[#adc6ff]' : 'bg-[#adc6ff]/20'}`}></div>
             </div>
           </div>
 
           <div className="bg-[#222a3d] rounded-xl p-6 flex flex-col justify-between">
             <div className="flex justify-between items-center">
-              <span className="text-[10px] font-bold text-[#4edea3] uppercase tracking-widest">Level 24 Executive</span>
-              <span className="text-[10px] font-bold text-slate-400">1,240 / 2,000 XP</span>
+              <span className="text-[10px] font-bold text-[#4edea3] uppercase tracking-widest">Level {level} Executive</span>
+              <span className="text-[10px] font-bold text-slate-400">{userProfile.totalXP} / {xpMax} XP</span>
             </div>
             <div className="my-4">
               <div className="w-full h-3 bg-[#2d3449] rounded-full overflow-hidden">
-                <div className="h-full bg-[#4edea3] w-[62%]"></div>
+                <div style={{ width: `${xpPercent}%` }} className="h-full bg-[#4edea3]"></div>
               </div>
             </div>
             <div className="flex items-center gap-2">
               <span className="material-symbols-outlined text-[#4edea3] text-sm">stars</span>
-              <p className="text-[10px] text-[#c2c6d6]">760 XP until <span className="text-[#4edea3]">Director Tier</span></p>
+              <p className="text-[10px] text-[#c2c6d6]">{xpNeeded} XP until <span className="text-[#4edea3]">Next Director Tier</span></p>
             </div>
           </div>
 
@@ -155,16 +222,20 @@ export default function Dashboard() {
                 <span className="material-symbols-outlined text-3xl">local_fire_department</span>
               </div>
               <div>
-                <p className="text-2xl font-extrabold font-headline text-[#B9B9B9]">14 Day Streak</p>
+                <p className="text-2xl font-extrabold font-headline text-[#B9B9B9]">{userProfile.streak} Day Streak</p>
                 <p className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">You are in the top 2% of candidates</p>
               </div>
             </div>
             <div className="flex gap-2">
-              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => (
-                <div key={idx} className={`w-8 h-8 rounded flex items-center justify-center text-[10px] font-bold ${idx < 5 ? 'bg-[#4edea3]/20 text-[#4edea3]' : 'bg-[#2d3449] text-slate-500'}`}>
-                  {day}
-                </div>
-              ))}
+              {['M', 'T', 'W', 'T', 'F', 'S', 'S'].map((day, idx) => {
+                const activeDaysCount = userProfile.streak >= 7 ? 7 : userProfile.streak;
+                const isDayActive = idx < activeDaysCount;
+                return (
+                  <div key={idx} className={`w-8 h-8 rounded flex items-center justify-center text-[10px] font-bold ${isDayActive ? 'bg-[#4edea3]/20 text-[#4edea3]' : 'bg-[#2d3449] text-slate-500'}`}>
+                    {day}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -181,11 +252,7 @@ export default function Dashboard() {
         <div className="col-span-12 bg-[#000000] rounded-xl p-8">
           <h3 className="text-[#c2c6d6] font-headline font-bold text-sm uppercase tracking-widest mb-8">AI-Driven Strategic Adjustments</h3>
           <div className="space-y-0">
-            {[
-              { icon: 'psychology', title: 'Resume Recalibration', time: '2 hours ago', desc: "AI refined the 'Executive Leadership' section of your CV to better align with Amazon's 16 Leadership Principles. Probability increased by +1.2%." },
-              { icon: 'monitoring', title: 'Market Intelligence Shift', time: '6 hours ago', desc: "Detected 14 new 'Staff Engineer' openings in the Seattle area. Matching your profile with 4 high-priority leads." },
-              { icon: 'auto_awesome', title: 'Interview Insight Generated', time: 'Yesterday', desc: 'Custom behavioral response bank generated for your upcoming technical screening with Google. Focus on Distributed Systems Fault Tolerance.' },
-            ].map((item, idx) => (
+            {(userProgress.recentActivities || []).map((item, idx) => (
               <div key={idx} className="flex gap-6 py-6 border-b border-slate-800/20 last:border-b-0">
                 <div className="shrink-0 w-10 h-10 rounded-full bg-[#adc6ff]/10 flex items-center justify-center">
                   <span className="material-symbols-outlined text-[#adc6ff] text-sm">{item.icon}</span>
@@ -205,3 +272,4 @@ export default function Dashboard() {
     </>
   );
 }
+

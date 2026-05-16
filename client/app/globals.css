@@ -23,6 +23,11 @@
   --primary-container: #4d8eff;
   --secondary: #4edea3;
   --tertiary: #b9c8de;
+  --on-surface-variant: #c2c6d6;
+  --on-tertiary: #233143;
+  --primary-fixed: #d8e2ff;
+  --surface-dim: #000000;
+  --surface-tint: #adc6ff;
 }
 
 html, body {
@@ -31,11 +36,13 @@ html, body {
   background-color: #000000;
   color: var(--on-background);
   font-family: 'Inter', sans-serif;
+  color-scheme: dark;
 }
 
 .glass-panel {
   background: rgba(45, 52, 73, 0.4);
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .material-symbols-outlined {
@@ -51,10 +58,17 @@ html, body {
   white-space: nowrap;
   word-wrap: normal;
   direction: ltr;
+  vertical-align: middle;
 }
 
 .ai-pulse {
+  box-shadow: 0 0 15px rgba(173, 198, 255, 0.6);
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: .5; }
 }
 
 @keyframes fadeIn {
