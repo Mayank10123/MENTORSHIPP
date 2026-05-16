@@ -19,6 +19,12 @@ const progressSchema = new mongoose.Schema({
         score: Number,
         weaknessDetected: String,
         date: { type: Date, default: Date.now }
+    }],
+    recentActivities: [{
+        icon: String,
+        title: String,
+        time: String,
+        desc: String
     }]
 }, { timestamps: true });
 

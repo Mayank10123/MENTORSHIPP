@@ -56,6 +56,10 @@ class ProgressPayload(BaseModel):
     days_active: int
     total_days: int
 
+class MentorContextPayload(BaseModel):
+    user_input: str
+    context: Optional[str] = ""
+
 @app.get("/")
 def read_root():
     return {"status": "AI Service Running", "model": "llama-3.1-8b-instant"}
@@ -170,7 +174,7 @@ async def interview_feedback(payload: InterviewPayload):
         "accuracy_score": 6.9,
         "feedback": f"Good structure. Consider {['more specific examples', 'better time complexity', 'horizontal scaling'][hash(payload.user_response) % 3]}.",
         "areas_to_improve": ["Speak more concisely", "Include metrics", "Address edge cases"],
-        "next_question": f"Tell us about a time you had to..."
+        "next_question": f"Question {payload.question_number + 1}: Tell us about a time you demonstrated leadership under pressure."
     }
 
 # ==================== PROGRESS & PREDICTION ====================
@@ -190,7 +194,7 @@ async def predict_placement(payload: ProgressPayload):
         "completion_rate": f"{completion_rate*100:.0f}%",
         "consistency_rate": f"{consistency_rate*100:.0f}%",
         "prediction": f"At this rate, {round(placement_chance, 0):.0f}% placement chance by target date",
-        "alert": "⚠️ You're 18% below target" if placement_chance < 65 else None
+        "alert": "⚠️ You're 18% below target" if placement_chance < 65 else ""
     }
 
 # ==================== RISK DETECTION ====================
@@ -217,13 +221,13 @@ async def detect_risk(payload: ProgressPayload):
 # ==================== MENTOR CONTEXT ====================
 
 @app.post("/mentor/context")
-async def mentor_with_context(payload: dict):
+async def mentor_with_context(payload: MentorContextPayload):
     """Context-aware mentor with Groq AI"""
     from core.llm import generate_json_response
     import json as json_module
     
-    user_input = payload.get("user_input", "")
-    context = payload.get("context", "")
+    user_input = payload.user_input
+    context = payload.context or ""
     
     print(f"🤖 Mentor received: {user_input}")
     

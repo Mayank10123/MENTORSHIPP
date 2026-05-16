@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { safeApiFetch, API_URLS } from '@/lib/api';
 
 export default function ProgressIntelligence() {
   const [tasksCompleted, setTasksCompleted] = useState('8');
@@ -10,6 +11,32 @@ export default function ProgressIntelligence() {
   const [prediction, setPrediction] = useState(null);
   const [risks, setRisks] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const email = typeof window !== 'undefined' ? (localStorage.getItem('userEmail') || 'mayank@example.com') : 'mayank@example.com';
+    const fetchProgressData = async () => {
+      try {
+        const data = await safeApiFetch(`${API_URLS.NODE}/api/user/progress?email=${email}`);
+        if (data) {
+          if (data.currentWeekTasks && data.currentWeekTasks.length > 0) {
+            const completed = data.currentWeekTasks.filter(t => t.status === 'completed').length;
+            const total = data.currentWeekTasks.length;
+            setTasksCompleted(completed.toString());
+            setTotalTasks(total.toString());
+          }
+          if (data.riskLevel) {
+            setRisks({
+              risk_level: data.riskLevel,
+              alerts: data.riskLevel === 'safe' ? [] : ['AI detected a slight dip in week-over-week consistency.']
+            });
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch progress data:', err);
+      }
+    };
+    fetchProgressData();
+  }, []);
 
   const analyzePrediction = async () => {
     console.log('Get Prediction button clicked');
