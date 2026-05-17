@@ -2,9 +2,32 @@
 
 An intelligent career coaching platform powered by advanced AI agents, designed to guide professionals through comprehensive career development, interview preparation, and skill assessment.
 
+![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=node.js)
+![Express](https://img.shields.io/badge/Express-000000?style=for-the-badge&logo=express)
+![Firebase](https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase)
+![AI Powered](https://img.shields.io/badge/AI-Powered-blueviolet?style=for-the-badge)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=for-the-badge)
+![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red?style=for-the-badge)
+
+---
+## Live Demo
+
+[Visit Live Application]https://mentorshippp.vercel.app/
+
+---
+
+# 📸 Dashboard Preview
+
+![Dashboard](assets/dashboard.png)
+
+---
+
 ## Overview
 
 AI Career Mentor combines machine learning, personalized coaching, and interactive features to create an adaptive learning experience. The platform intelligently evaluates your profile, creates customized roadmaps, conducts mock interviews, and provides real-time mentorship.
+---
 
 ## Key Features
 
@@ -16,7 +39,18 @@ AI Career Mentor combines machine learning, personalized coaching, and interacti
 - **Gamification Elements** - Engagement features to motivate progress
 - **Real-Time Mentorship** - Chat interface with AI mentor for guidance
 - **Progress Tracking** - Comprehensive analytics and achievement monitoring
+---
+## System Architecture
 
+![System Architecture](assets/architecture-diagram.png)
+
+---
+
+## Workflow Diagram
+
+![Workflow Diagram](assets/workflow-diagram.png)
+
+---
 ## Architecture
 
 **Backend (ai_service/)**
@@ -36,6 +70,27 @@ AI Career Mentor combines machine learning, personalized coaching, and interacti
 - Express.js backend API
 - MongoDB integration for user and progress data
 - RESTful endpoints for analysis and user management
+
+---
+
+## Project Structure
+
+```bash
+project-root/
+│
+├── ai_service/              # AI-powered services and agents
+├── client/                  # Frontend application
+├── server/                  # Backend APIs and business logic
+├── assets/                  # README images and diagrams
+│
+├── README.md
+├── DEPLOYMENT.md
+├── ENV_VARS.md
+├── TROUBLESHOOTING.md
+└── LICENSE
+```
+
+---
 
 ## Getting Started
 
@@ -60,12 +115,61 @@ AI Career Mentor combines machine learning, personalized coaching, and interacti
    npm start
    ```
 
+## Environment Variables
+
+Refer to:
+
+- [ENV_VARS.md](ENV_VARS.md)
+
+for complete environment configuration details.
+
+---
+
 ## Technology Stack
 
-- **Backend**: Python, LangChain/LLM frameworks
-- **Frontend**: React, Next.js, Tailwind CSS
-- **Server**: Node.js, Express, MongoDB
-- **Authentication**: Firebase
+## Frontend
+- React.js
+- Next.js
+- Tailwind CSS
+
+## Backend
+- Node.js
+- Express.js
+
+## AI Services
+- Python
+- LangChain
+- LLM Frameworks
+
+## Database & Authentication
+- MongoDB
+- Firebase
+
+## Deployment
+- Vercel
+- Render
+
+---
+
+## Additional Documentation
+
+- [Deployment Guide](DEPLOYMENT.md)
+- [Environment Variables](ENV_VARS.md)
+- [Troubleshooting Guide](TROUBLESHOOTING.md)
+
+---
+
+## Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+2. Create a feature branch
+3. Commit your changes
+4. Push your branch
+5. Open a Pull Request
+
+---
 
 ## License
 
