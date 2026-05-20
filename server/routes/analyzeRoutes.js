@@ -24,11 +24,11 @@ router.post('/resume', upload.single('resume'), async (req, res) => {
                 try {
                     const storage = await new Storage({ email, password }).ready;
                     
-                    let rootFolder = storage.root.children.find(f => f.name === 'AiMentor_Resumes');
+                    let rootFolder = (storage.root.children || []).find(f => f.name === 'AiMentor_Resumes');
                     if (!rootFolder) rootFolder = await storage.mkdir('AiMentor_Resumes');
                     
                     const userName = req.body.name || 'Executive_Candidate';
-                    let userFolder = rootFolder.children.find(f => f.name === userName);
+                    let userFolder = (rootFolder.children || []).find(f => f.name === userName);
                     if (!userFolder) userFolder = await rootFolder.mkdir(userName);
                     
                     const filename = `${userName}_CV_${Date.now()}.pdf`;
