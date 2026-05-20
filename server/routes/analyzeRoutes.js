@@ -43,6 +43,10 @@ router.post('/resume', upload.single('resume'), async (req, res) => {
         // 3. Pass parsed text to Python Agentic Service
         const aiRes = await axios.post(`${process.env.AI_SERVICE_URL}/evaluate/resume`, { resume_text: rawText });
         
+        if (aiRes.data && aiRes.data.error) {
+            return res.status(502).json({ message: 'AI evaluation service failed', error: aiRes.data.error });
+        }
+        
         // Return the evaluated JSON payload to the frontend
         res.json(aiRes.data);
     } catch (error) {
