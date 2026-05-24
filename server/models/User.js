@@ -6,7 +6,7 @@ const userSchema = new mongoose.Schema(
         name: { type: String, required: true, trim: true, minLength: 2, maxLength: 50 },
         email: { type: String, required: true, unique: true, trim: true, lowercase: true, match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email'] },
         password: { type: String, required: true, minLength: 6 },
-        targetRole: { type: String, default: "Software Engineer" },
+        targetRole: { type: String, default: "Software Engineer", trim: true },
         placementProbability: { type: Number, default: 45, min: 0, max: 100 },
         skills: { type: Map, of: Number, default: {} }, // e.g., {'System Design': 85}
         companyFitScores: { type: Map, of: Number, default: {} },
