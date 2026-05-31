@@ -400,48 +400,6 @@ function SkillsRoadmap({ onBack, skillGap = [], company, companyInfo }) {
   );
 }
 
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 16, animation: downloading ? 'spin 1s linear infinite' : 'none' }}
-            >
-              {downloading ? 'autorenew' : 'download'}
-            </span>
-            {downloading ? 'Generating PDF...' : 'Download PDF'}
-          </button>
-        </div>
-
-        
-        <div className={s.phasesGrid}>
-          {skillGap.map((gap, idx) => <PhaseBlock key={idx} num={idx+1} {...phases[gap]} />)}
-        </div>
-
-        
-        <div className={s.footer}>
-          <h2 className={s.footerTitle}>All {skillGap.length} skills — fully mapped 🚀</h2>
-          <p className={s.footerSub}>
-            Total estimated time: <strong>~30–40 weeks</strong> at 1–2 hrs/day ·<br></br><br></br>
-            {skillGap.map((gap, idx) => gap+" → ")} End Goal
-          </p>
-          <button
-            className={`${s.btn} ${s.btnPrimary}`}
-            onClick={downloadRoadmapPDF}
-            disabled={downloading}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 16, animation: downloading ? 'spin 1s linear infinite' : 'none' }}
-            >
-              {downloading ? 'autorenew' : 'download'}
-            </span>
-            {downloading ? 'Generating PDF...' : 'Download PDF'}
-          </button>
-        </div>
-      </div>
-    </>
-  );
-}
-
-
 export default function ProfileAnalyzer() {
   const [cgpa, setCgpa] = useState('');
   const [skills, setSkills] = useState('');
