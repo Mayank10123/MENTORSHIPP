@@ -204,10 +204,10 @@ router.get('/:id/profile', async (req, res) => {
                 totalXP: 1240
             });
         }
-        
+
         const user = await User.findById(req.params.id);
         if (!user) return res.status(404).json({ message: 'User not found' });
-        
+
         res.json({
             placementProbability: user.placementProbability,
             skills: user.skills,
@@ -221,4 +221,3 @@ router.get('/:id/profile', async (req, res) => {
 });
 
 module.exports = router;
-
