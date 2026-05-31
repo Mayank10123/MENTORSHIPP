@@ -1,7 +1,13 @@
 ﻿'use client';
 
 import { useState } from 'react';
+import * as pdfjsLib from 'pdfjs-dist';
 import { safeApiFetch, API_URLS } from '@/lib/api';
+
+// Set up PDF.js worker
+if (typeof window !== 'undefined') {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+}
 
 export default function ResumeLab() {
   const [resumeText, setResumeText] = useState('');
@@ -14,32 +20,24 @@ export default function ResumeLab() {
     try {
       const arrayBuffer = await file.arrayBuffer();
       
-      // Safety check: if file is too large, just return a message
-      if (arrayBuffer.byteLength > 5 * 1024 * 1024) {
-        return `PDF file too large: "${file.name}". Please paste your resume text directly in the text area.`;
+      // Use PDF.js to properly parse the PDF
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      let fullText = '';
+      
+      for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+        const page = await pdf.getPage(pageNum);
+        const textContent = await page.getTextContent();
+        const pageText = textContent.items.map((item) => item.str).join(' ');
+        fullText += pageText + '\n';
       }
       
-      const bytes = new Uint8Array(arrayBuffer);
-      let text = '';
+      const cleanedText = fullText.replace(/\s+/g, ' ').trim();
       
-      // Simple approach: extract readable ASCII characters
-      for (let i = 0; i < bytes.length && i < 100000; i++) {
-        const byte = bytes[i];
-        // Include printable ASCII (space to tilde)
-        if (byte >= 32 && byte <= 126) {
-          text += String.fromCharCode(byte);
-        } else if (byte === 10 || byte === 13) {
-          text += '\n';
-        }
-      }
-      
-      text = text.replace(/\s+/g, ' ').trim();
-      
-      if (text.length < 50) {
+      if (cleanedText.length < 50) {
         return `PDF uploaded: "${file.name}". Please paste your resume text directly in the text area for better analysis.`;
       }
       
-      return text;
+      return cleanedText;
     } catch (error) {
       console.error('Error extracting PDF text:', error.message);
       return `PDF file uploaded: "${file.name}". Please paste your resume text directly in the text area for the best results.`;
