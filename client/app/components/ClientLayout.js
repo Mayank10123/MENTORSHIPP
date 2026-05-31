@@ -127,9 +127,7 @@ export default function ClientLayout({ children }) {
             <div className="mb-8 mt-16 flex items-center justify-between px-4 lg:justify-start">
               <div className="flex items-center gap-3">
                 <div className="h-10 w-10 overflow-hidden rounded-lg border border-outline/20 bg-surface-container-high">
-                  <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-container to-primary text-sm font-bold text-white">
-                    AI
-                  </div>
+                  <img src="/brain-icon.png" alt="AI Brain" className="h-full w-full object-cover" />
                 </div>
                 <div>
                   <p className="font-headline text-sm font-bold text-on-surface">Executive Coach</p>
