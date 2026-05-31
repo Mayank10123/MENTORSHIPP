@@ -131,10 +131,10 @@ export default function MentorChat() {
   };
 
   const quickActions = [
-    { label: 'DSA Help', emoji: 'ðŸ“Š' },
-    { label: 'Interview Tips', emoji: 'ðŸŽ¯' },
-    { label: 'Project Ideas', emoji: 'ðŸš€' },
-    { label: 'Motivation', emoji: 'ðŸ’ª' },
+    { label: 'DSA Help', icon: 'trending_up' },
+    { label: 'Interview Tips', icon: 'psychology' },
+    { label: 'Project Ideas', icon: 'build' },
+    { label: 'Motivation', icon: 'sentiment_very_satisfied' },
   ];
 
   return (
@@ -222,7 +222,7 @@ export default function MentorChat() {
                   onClick={() => handleQuickAction(action)}
                   className="w-full px-4 py-3 bg-surface hover:bg-surface-container-high border border-outline rounded-lg text-on-surface transition-all text-left flex items-center gap-3"
                 >
-                  <span className="text-xl">{action.emoji}</span>
+                  <span className="material-symbols-outlined text-primary">{action.icon}</span>
                   <span className="text-sm font-semibold">{action.label}</span>
                 </button>
               ))}
@@ -249,7 +249,7 @@ export default function MentorChat() {
 
               <div>
                 <p className="font-semibold text-on-surface mb-1">Achievements</p>
-                <p>5-day streak â­</p>
+                <p>5-day streak ⭐</p>
               </div>
             </div>
           </div>
@@ -257,7 +257,7 @@ export default function MentorChat() {
           {/* Motivation */}
           <div className="bg-gradient-to-br from-primary/10 to-secondary/10 rounded-xl p-6 border border-primary/20">
             <p className="text-sm text-on-surface">
-              <span className="font-bold">ðŸ’¡ Did you know?</span> Students who practice with structured mentoring improve their placement chances by 3x. Keep grinding!
+              <span className="font-bold">💡 Did you know?</span> Students who practice with structured mentoring improve their placement chances by 3x. Keep grinding!
             </p>
           </div>
         </div>

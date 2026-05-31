@@ -6,7 +6,7 @@ import { safeApiFetch, API_URLS } from '@/lib/api';
 
 // Set up PDF.js worker
 if (typeof window !== 'undefined') {
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.js`;
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js`;
 }
 
 export default function ResumeLab() {
@@ -18,10 +18,13 @@ export default function ResumeLab() {
 
   const extractTextFromPDF = async (file) => {
     try {
+      console.log('Extracting text from PDF:', file.name);
       const arrayBuffer = await file.arrayBuffer();
+      console.log('PDF buffer size:', arrayBuffer.byteLength);
       
       // Use PDF.js to properly parse the PDF
       const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      console.log('PDF pages:', pdf.numPages);
       let fullText = '';
       
       for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
@@ -29,17 +32,20 @@ export default function ResumeLab() {
         const textContent = await page.getTextContent();
         const pageText = textContent.items.map((item) => item.str).join(' ');
         fullText += pageText + '\n';
+        console.log(`Extracted page ${pageNum}: ${pageText.length} characters`);
       }
       
       const cleanedText = fullText.replace(/\s+/g, ' ').trim();
+      console.log('Total extracted text:', cleanedText.length, 'characters');
       
       if (cleanedText.length < 50) {
+        console.warn('PDF text too short, may have extraction issues');
         return `PDF uploaded: "${file.name}". Please paste your resume text directly in the text area for better analysis.`;
       }
       
       return cleanedText;
     } catch (error) {
-      console.error('Error extracting PDF text:', error.message);
+      console.error('Error extracting PDF text:', error);
       return `PDF file uploaded: "${file.name}". Please paste your resume text directly in the text area for the best results.`;
     }
   };
@@ -65,36 +71,30 @@ export default function ResumeLab() {
   };
 
   const handleEvaluate = async () => {
-    if (!resumeText.trim()) return;
+    if (!resumeText.trim()) {
+      alert('Please upload or paste your resume first.');
+      return;
+    }
     setLoading(true);
     try {
-      let data;
+      // Always send extracted text to backend (works for both PDF and text files)
+      console.log('Sending resume text to backend:', resumeText.substring(0, 100) + '...');
+      const data = await safeApiFetch(`${API_URLS.NODE}/api/analyze/resume`, {
+        method: 'POST',
+        body: JSON.stringify({ resume_text: resumeText }),
+      });
+      console.log('Analysis result:', data);
 
-      if (resumeFile && (resumeFile.type === 'application/pdf' || resumeFile.name.endsWith('.pdf'))) {
-        // Send actual PDF file to Node.js for proper pdf-parse extraction + Mega.nz backup
-        const formData = new FormData();
-        formData.append('resume', resumeFile);
-
-        const response = await fetch(`${API_URLS.NODE}/api/analyze/resume`, {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          data = await response.json();
-        }
-      } else {
-        // Text-only: send through Node.js as JSON
-        data = await safeApiFetch(`${API_URLS.NODE}/api/analyze/resume`, {
-          method: 'POST',
-          body: JSON.stringify({ resume_text: resumeText }),
-        });
-      }
-
-      if (data) {
+      if (data && data.atsScore) {
         setResult(data);
+      } else {
+        console.warn('Unexpected response format:', data);
+        throw new Error('Invalid response from backend');
       }
     } catch (err) {
+      console.error('Error analyzing resume:', err.message);
+      alert(`Error: ${err.message}`);
+      
       // Demo data for testing
       setResult({
         atsScore: 82,
