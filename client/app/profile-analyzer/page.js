@@ -1,6 +1,6 @@
 ﻿'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { safeApiFetch, API_URLS } from '@/lib/api';
 import s from './roadmap.module.css';
 
@@ -184,39 +184,69 @@ function PhaseBlock({ num, colorClass, name, duration, level, topics, resources,
   );
 }
 
-function SkillsRoadmap({ onBack, skillGap=[] }) {
+function SkillsRoadmap({ onBack, skillGap = [], company, companyInfo }) {
   const [downloading, setDownloading] = useState(false);
-  function serializePhases(keys) {
-    return keys
-      .filter(key => phases[key])
-      .map(key => {
-        const p = phases[key];
-        return {
-          name: p.name,
-          colorClass: p.colorClass,
-          duration: p.duration,
-          level: p.level,
-          topics: p.topics,
-          resources: p.resources.map(r =>
-            typeof r === 'string'
-              ? { text: r, href: null }
-              : { text: r.props.children, href: r.props.href }
-          ),
-          outcomes: p.outcomes,
-          deps: p.deps,
-        };
-      });
+  const [taskState, setTaskState] = useState([]);
+
+  useEffect(() => {
+    setTaskState(skillGap.map(() => Array(3).fill(false)));
+  }, [skillGap]);
+
+  const learningResources = {
+    Python: ['CS50P – Harvard Python Course', 'Automate the Boring Stuff', 'Python.org Tutorial'],
+    Java: ['MOOC.fi Java Programming', 'Codecademy Learn Java', 'Effective Java'],
+    DSA: ['NeetCode 150', 'Grokking Algorithms', 'LeetCode practice'],
+    SQL: ['CS50 SQL', 'SQLZoo', 'Mode Analytics SQL'],
+    APIs: ['FastAPI docs', 'Baeldung REST tutorial', 'Postman Learning Center'],
+    React: ['React official docs', 'Scrimba Learn React', 'React Hooks tutorials'],
+    Docker: ['Docker getting started', 'TechWorld with Nana', 'Docker Mastery'],
+    AWS: ['AWS Cloud Practitioner Essentials', 'Stephane Maarek AWS SAA', 'AWS Well-Architected docs'],
+    'System Design': ['System Design Primer', 'Designing Data-Intensive Applications', 'Scalability lectures'],
+  };
+
+  const companyHighlight = companyInfo ? `${companyInfo.pattern} · Hiring rate ${companyInfo.hiring_rate}` : 'Balanced preparation across core FAANG topics.';
+  const timelineWeeks = Math.max(6, skillGap.length * 2);
+
+  const roadmapPlan = skillGap.map((gap, idx) => {
+    const topic = gap || 'Core skill';
+    return {
+      week: `Week ${idx * 2 + 1}-${idx * 2 + 2}`,
+      milestone: `Master ${topic}`,
+      focus: `${topic} mastery and application`,
+      tasks: [
+        `Study ${topic} fundamentals`,
+        `Build a short project or guided exercise`,
+        `Review progress with a checkpoint`,
+      ],
+      resources: learningResources[gap] || ['Curated learning path', 'Hands-on project', 'Review quiz'],
+      outcomes: [`Improve ${topic} confidence`, `Strengthen interview readiness`, `Create a portfolio-ready example`],
+      companyTrack: companyInfo ? companyInfo.pattern : null,
+    };
+  });
+
+  const completedCount = taskState.flat().filter(Boolean).length;
+  const totalCount = taskState.flat().length || 1;
+  const completionPercent = Math.round((completedCount / totalCount) * 100);
+
+  function serializeRoadmap(plan) {
+    return plan.map((phase) => ({
+      name: phase.milestone,
+      duration: phase.week,
+      topics: [phase.focus],
+      resources: phase.resources.map((resource) => ({ text: resource, href: null })),
+      outcomes: phase.outcomes,
+      deps: [{ label: 'Company track' }, { chip: company || 'General' }],
+    }));
   }
 
-async function downloadRoadmapPDF() {
+  async function downloadRoadmapPDF() {
     setDownloading(true);
     try {
-      const serialized = serializePhases(skillGap);
-
+      const serialized = serializeRoadmap(roadmapPlan);
       const response = await fetch(`${API_URLS.PYTHON}/download/roadmap/pdf`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phases: serialized, total_time: '30–40 weeks' }),
+        body: JSON.stringify({ phases: serialized, total_time: `${timelineWeeks} weeks`, company: company || 'General' }),
       });
 
       const blob = await response.blob();
@@ -233,6 +263,14 @@ async function downloadRoadmapPDF() {
     }
   }
 
+  const toggleTask = (weekIndex, taskIndex) => {
+    setTaskState((prev) => {
+      const next = prev.map((week) => [...week]);
+      next[weekIndex][taskIndex] = !next[weekIndex][taskIndex];
+      return next;
+    });
+  };
+
   return (
     <>
       <div className={`${s.blob} ${s.b1}`} />
@@ -245,13 +283,34 @@ async function downloadRoadmapPDF() {
           Back to Analyzer
         </button>
 
-        <h1 className={s.pageTitle}>Your <em>Learning</em> Path</h1>
+        <h1 className={s.pageTitle}>Your <em>Remediation</em> Roadmap</h1>
         <p className={s.subtitle}>
-          One dedicated phase per skill — logically ordered so each one builds on the last.
-          Topics, resources, and outcomes for every step.
+          Skill-gap remediation mapped into milestones, weekly targets, company-specific preparation, and progress checkpoints.
         </p>
 
-        
+        <div className={s.planSummary}>
+          <div>
+            <p className="text-sm uppercase tracking-[0.24em] text-on-surface-variant mb-2">Target company</p>
+            <h2 className="text-2xl font-bold text-on-surface">{company || 'General'}</h2>
+            <p className="mt-2 text-sm text-on-surface-variant">{companyHighlight}</p>
+          </div>
+
+          <div className={s.summaryStats}>
+            <div>
+              <p className="text-sm text-on-surface-variant">Estimated timeline</p>
+              <p className="text-xl font-bold text-on-surface">{timelineWeeks} weeks</p>
+            </div>
+            <div>
+              <p className="text-sm text-on-surface-variant">Milestones</p>
+              <p className="text-xl font-bold text-on-surface">{roadmapPlan.length}</p>
+            </div>
+            <div>
+              <p className="text-sm text-on-surface-variant">Progress</p>
+              <p className="text-xl font-bold text-on-surface">{completionPercent}%</p>
+            </div>
+          </div>
+        </div>
+
         <div className={s.actions}>
           <button
             className={`${s.btn} ${s.btnPrimary}`}
@@ -268,37 +327,78 @@ async function downloadRoadmapPDF() {
           </button>
         </div>
 
-        
         <div className={s.phasesGrid}>
-          {skillGap.map((gap, idx) => <PhaseBlock key={idx} num={idx+1} {...phases[gap]} />)}
+          {roadmapPlan.map((phase, idx) => (
+            <div key={idx} className={`${s.phaseBlock} ${s[phases[skillGap[idx]]?.colorClass || 'c1']}`}>
+              <div className={s.phaseAccent} />
+              <div className={s.phaseHeader}>
+                <div className={s.phLeft}>
+                  <div className={s.phaseNum}>{idx + 1}</div>
+                  <div>
+                    <div className={s.phaseLabel}>{phase.week}</div>
+                    <div className={s.phaseName}>{phase.milestone}</div>
+                  </div>
+                </div>
+                <div className={s.phRight}>
+                  <div className={`${s.badge} ${s.badgeDur}`}>{phase.focus}</div>
+                </div>
+              </div>
+
+              <div className={s.phaseBody}>
+                <div className={s.pcol}>
+                  <div className={s.colLbl}>Weekly Targets</div>
+                  <ul className={s.resList}>
+                    {phase.tasks.map((task, taskIdx) => (
+                      <li key={taskIdx} className={s.taskItem}>
+                        <label className="flex items-center gap-3">
+                          <input
+                            type="checkbox"
+                            checked={taskState[idx]?.[taskIdx] || false}
+                            onChange={() => toggleTask(idx, taskIdx)}
+                            className="h-4 w-4 rounded border-outline text-secondary focus:ring-secondary"
+                          />
+                          <span>{task}</span>
+                        </label>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={s.pcol}>
+                  <div className={s.colLbl}>Recommended Resources</div>
+                  <ul className={s.resList}>
+                    {phase.resources.map((resource, rIdx) => (
+                      <li key={rIdx}>{resource}</li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className={s.pcol}>
+                  <div className={s.colLbl}>Expected Outcomes</div>
+                  <div className={s.outList}>
+                    {phase.outcomes.map((outcome, oIdx) => (
+                      <div key={oIdx} className={s.outItem}>
+                        <span className="material-symbols-outlined">check_circle</span>
+                        {outcome}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
 
-        
         <div className={s.footer}>
-          <h2 className={s.footerTitle}>All {skillGap.length} skills — fully mapped 🚀</h2>
+          <h2 className={s.footerTitle}>Roadmap checkpoint</h2>
           <p className={s.footerSub}>
-            Total estimated time: <strong>~30–40 weeks</strong> at 1–2 hrs/day ·<br></br><br></br>
-            {skillGap.map((gap, idx) => gap+" → ")} End Goal
+            Complete the tasks in each milestone to close the gap and stay aligned with your company preparation track.
           </p>
-          <button
-            className={`${s.btn} ${s.btnPrimary}`}
-            onClick={downloadRoadmapPDF}
-            disabled={downloading}
-          >
-            <span
-              className="material-symbols-outlined"
-              style={{ fontSize: 16, animation: downloading ? 'spin 1s linear infinite' : 'none' }}
-            >
-              {downloading ? 'autorenew' : 'download'}
-            </span>
-            {downloading ? 'Generating PDF...' : 'Download PDF'}
-          </button>
         </div>
       </div>
     </>
   );
 }
-
 
 export default function ProfileAnalyzer() {
   const [cgpa, setCgpa] = useState('');
@@ -309,6 +409,32 @@ export default function ProfileAnalyzer() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showRoadmap, setShowRoadmap] = useState(false);
+  const [company, setCompany] = useState('Google');
+  const [companyInfo, setCompanyInfo] = useState(null);
+
+  const companies = ['Google', 'Amazon', 'Meta', 'Microsoft', 'Apple'];
+
+  const fetchCompanyIntelligence = async (companyName) => {
+    try {
+      const companyData = await safeApiFetch(`${API_URLS.PYTHON}/intelligence/company`, {
+        method: 'POST',
+        body: JSON.stringify({
+          company_name: companyName,
+          target_role: targetRole,
+        }),
+      });
+      setCompanyInfo(companyData);
+    } catch (error) {
+      console.error('Company intelligence error:', error);
+      setCompanyInfo(null);
+    }
+  };
+
+  useEffect(() => {
+    if (analysis) {
+      fetchCompanyIntelligence(company);
+    }
+  }, [analysis, company, targetRole]);
 
   const analyzeProfile = async () => {
     if (!cgpa || !skills || !projects || !experience) {
@@ -326,6 +452,7 @@ export default function ProfileAnalyzer() {
           projects: parseInt(projects),
           years_experience: parseFloat(experience),
           target_role: targetRole,
+          company_name: company,
         }),
       });
       setAnalysis(data ?? null);
@@ -338,7 +465,14 @@ export default function ProfileAnalyzer() {
 
   
   if (showRoadmap) {
-    return <SkillsRoadmap onBack={() => setShowRoadmap(false)} skillGap={analysis.skill_gap} />;
+    return (
+      <SkillsRoadmap
+        onBack={() => setShowRoadmap(false)}
+        skillGap={analysis.skill_gap}
+        company={company}
+        companyInfo={companyInfo}
+      />
+    );
   }
 
   return (
@@ -381,6 +515,15 @@ export default function ProfileAnalyzer() {
                 <option>Product Manager</option>
                 <option>Data Scientist</option>
                 <option>DevOps Engineer</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-bold text-on-surface-variant uppercase tracking-widest mb-2">Target Company</label>
+              <select value={company} onChange={(e) => setCompany(e.target.value)} className="w-full p-3 bg-surface border border-outline rounded-lg text-on-surface focus:outline-none focus:border-primary">
+                {companies.map((companyName) => (
+                  <option key={companyName} value={companyName}>{companyName}</option>
+                ))}
               </select>
             </div>
 
@@ -440,6 +583,27 @@ export default function ProfileAnalyzer() {
                 Generate Learning Path
               </button>
             </div>
+
+            {companyInfo && (
+              <div className="mt-6 bg-surface rounded-xl p-6 border border-outline/20">
+                <h3 className="text-lg font-bold text-on-surface mb-3">Company Prep Track</h3>
+                <p className="text-sm text-on-surface-variant mb-4">Targeting <strong>{company}</strong> with a focus on <strong>{companyInfo.pattern}</strong>.</p>
+                <div className="grid gap-4 sm:grid-cols-3">
+                  <div className="rounded-2xl bg-surface-container-high p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-on-surface-variant mb-2">Difficulty</p>
+                    <p className="text-xl font-bold text-on-surface">{companyInfo.difficulty}/10</p>
+                  </div>
+                  <div className="rounded-2xl bg-surface-container-high p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-on-surface-variant mb-2">Hiring rate</p>
+                    <p className="text-xl font-bold text-on-surface">{companyInfo.hiring_rate}</p>
+                  </div>
+                  <div className="rounded-2xl bg-surface-container-high p-4">
+                    <p className="text-xs uppercase tracking-[0.24em] text-on-surface-variant mb-2">Match score</p>
+                    <p className="text-xl font-bold text-on-surface">{companyInfo.match_score}%</p>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Recommendations */}
             <div className="bg-gradient-to-br from-secondary/10 to-primary/10 rounded-xl p-8 border border-secondary/20">

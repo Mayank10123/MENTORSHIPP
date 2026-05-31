@@ -12,6 +12,24 @@ export default function ClientLayout({ children }) {
   const { user, loading, logout } = useAuth();
   const [userName, setUserName] = useState('');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [openPanel, setOpenPanel] = useState(null);
+
+  const quickActions = [
+    { label: 'AI Mentor', description: 'Launch smart assistant', href: '/mentor-chat', icon: 'bolt' },
+    { label: 'Profile Analyzer', description: 'Analyze profile data', href: '/profile-analyzer', icon: 'person_search' },
+    { label: 'Interview Studio', description: 'Open interview prep', href: '/interview', icon: 'record_voice_over' },
+  ];
+
+  const notifications = [
+    { title: 'Weekly progress ready', message: 'Review your latest career insights in Progress Intelligence.' },
+    { title: 'Profile update suggested', message: 'Update your experience for better AI recommendations.' },
+  ];
+
+  const togglePanel = (panel) => {
+    setOpenPanel((current) => (current === panel ? null : panel));
+  };
+
+  const closePanel = () => setOpenPanel(null);
 
   // Check if current page requires authentication
   const isAuthPage = pathname === '/login' || pathname === '/signup';
@@ -93,17 +111,122 @@ export default function ClientLayout({ children }) {
                   <p className="text-xs text-on-surface-variant">{userName}</p>
                 </div>
                 <ThemeToggleButton />
-                <div className="flex items-center gap-2 text-on-surface-variant">
-                  {['bolt', 'notifications', 'account_circle'].map((icon) => (
-                    <button
-                      key={icon}
-                      type="button"
-                      className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline/20 bg-surface-container-low transition-all hover:border-primary/30 hover:bg-primary/10 hover:text-primary active:scale-95"
-                      aria-label={icon}
-                    >
-                      <span className="material-symbols-outlined">{icon}</span>
-                    </button>
-                  ))}
+                <div className="relative flex items-center gap-2 text-on-surface-variant">
+                  {['bolt', 'notifications', 'account_circle'].map((icon) => {
+                    const labels = {
+                      bolt: 'AI quick actions',
+                      notifications: 'Notifications',
+                      account_circle: 'Profile menu',
+                    };
+
+                    return (
+                      <button
+                        key={icon}
+                        type="button"
+                        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-outline/20 bg-surface-container-low transition-all hover:border-primary/30 hover:bg-primary/10 hover:text-primary active:scale-95"
+                        aria-label={labels[icon]}
+                        onClick={() => togglePanel(icon)}
+                      >
+                        <span className="material-symbols-outlined">{icon}</span>
+                      </button>
+                    );
+                  })}
+
+                  {openPanel && (
+                    <div className="absolute right-0 top-14 z-50 w-[calc(100vw-2rem)] max-w-[20rem] overflow-hidden rounded-3xl border border-outline/20 bg-surface-container-high p-4 shadow-2xl shadow-black/15 text-on-surface sm:w-[22rem]">
+                      <div className="mb-3 flex items-center justify-between gap-2">
+                        <p className="text-sm font-semibold uppercase tracking-[0.18em] text-on-surface-variant">
+                          {openPanel === 'bolt' ? 'AI Quick Actions' : openPanel === 'notifications' ? 'Notifications' : 'Profile'}
+                        </p>
+                        <button
+                          type="button"
+                          className="rounded-full border border-outline/20 p-2 text-on-surface hover:border-primary/30 hover:text-primary"
+                          onClick={closePanel}
+                          aria-label="Close panel"
+                        >
+                          <span className="material-symbols-outlined">close</span>
+                        </button>
+                      </div>
+
+                      {openPanel === 'bolt' && (
+                        <div className="space-y-3">
+                          {quickActions.map((action) => (
+                            <button
+                              key={action.href}
+                              type="button"
+                              onClick={() => {
+                                router.push(action.href);
+                                closePanel();
+                              }}
+                              className="flex w-full items-start gap-3 rounded-2xl border border-outline/20 bg-background/90 p-3 text-left transition-all hover:border-primary/30 hover:bg-primary/10"
+                            >
+                              <span className="material-symbols-outlined text-primary">{action.icon}</span>
+                              <div>
+                                <p className="text-sm font-semibold text-on-surface">{action.label}</p>
+                                <p className="text-xs text-on-surface-variant">{action.description}</p>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+
+                      {openPanel === 'notifications' && (
+                        <div className="space-y-3">
+                          {notifications.map((note, idx) => (
+                            <div key={idx} className="rounded-2xl border border-outline/20 bg-background/90 p-3">
+                              <p className="text-sm font-semibold text-on-surface">{note.title}</p>
+                              <p className="mt-1 text-xs text-on-surface-variant">{note.message}</p>
+                            </div>
+                          ))}
+                          <button
+                            type="button"
+                            className="mt-2 w-full rounded-2xl bg-primary/10 px-3 py-2 text-sm font-semibold text-primary transition hover:bg-primary/20"
+                            onClick={() => {
+                              router.push('/progress-intelligence');
+                              closePanel();
+                            }}
+                          >
+                            View All Alerts
+                          </button>
+                        </div>
+                      )}
+
+                      {openPanel === 'account_circle' && (
+                        <div className="space-y-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push('/profile');
+                              closePanel();
+                            }}
+                            className="w-full rounded-2xl border border-outline/20 bg-background/90 px-3 py-3 text-left text-sm font-semibold text-on-surface transition hover:border-primary/30 hover:bg-primary/10"
+                          >
+                            View Profile
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              router.push('/profile');
+                              closePanel();
+                            }}
+                            className="w-full rounded-2xl border border-outline/20 bg-background/90 px-3 py-3 text-left text-sm font-semibold text-on-surface transition hover:border-primary/30 hover:bg-primary/10"
+                          >
+                            Account Settings
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              logout();
+                              closePanel();
+                            }}
+                            className="w-full rounded-2xl bg-red-500/10 px-3 py-3 text-sm font-semibold text-red-400 transition hover:bg-red-500/20"
+                          >
+                            Logout
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
