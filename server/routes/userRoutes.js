@@ -68,34 +68,38 @@ router.post('/login', async (req, res) => {
 
         // Check password
         user.comparePassword(password, async (err, isPasswordValid) => {
-            if (err) {
-                return res.status(500).json({ message: 'Error validating password' });
-            }
-
-            if (!isPasswordValid) {
-                return res.status(400).json({ message: 'Invalid email or password' });
-            }
-
-            // Update last active
-            user.lastActive = new Date();
-            await user.save();
-
-            // Generate JWT token
-            const token = jwt.sign(
-                { userId: user._id, email: user.email },
-                process.env.JWT_SECRET || 'your-secret-key',
-                { expiresIn: '7d' }
-            );
-
-            res.json({
-                message: 'Login successful',
-                token,
-                user: {
-                    id: user._id,
-                    name: user.name,
-                    email: user.email
+            try {
+                if (err) {
+                    return res.status(500).json({ message: 'Error validating password' });
                 }
-            });
+
+                if (!isPasswordValid) {
+                    return res.status(400).json({ message: 'Invalid email or password' });
+                }
+
+                // Update last active
+                user.lastActive = new Date();
+                await user.save();
+
+                // Generate JWT token
+                const token = jwt.sign(
+                    { userId: user._id, email: user.email },
+                    process.env.JWT_SECRET || 'your-secret-key',
+                    { expiresIn: '7d' }
+                );
+
+                res.json({
+                    message: 'Login successful',
+                    token,
+                    user: {
+                        id: user._id,
+                        name: user.name,
+                        email: user.email
+                    }
+                });
+            } catch (saveError) {
+                res.status(500).json({ message: 'Error saving login activity', error: saveError.message });
+            }
         });
     } catch (error) {
         res.status(500).json({ message: error.message });
