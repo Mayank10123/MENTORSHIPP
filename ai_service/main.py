@@ -102,9 +102,9 @@ async def api_mentor_nudge(payload: MentorPayload):
 async def analyze_profile(payload: ProfilePayload):
     """Smart Profile Analyzer - calculates placement probability & gaps"""
     try:
-        # Calculate placement probability (mock ML logic)
+        # Calibrate CGPA (detect if it's on a 10.0 scale or 4.0 scale)
         base_score = 50
-        cgpa_score = min(payload.cgpa / 4.0 * 20, 20)
+        cgpa_score = min((payload.cgpa / 10.0) * 20, 20) if payload.cgpa > 4.0 else min((payload.cgpa / 4.0) * 20, 20)
         skills_score = min(len(payload.skills) * 5, 20)
         project_score = min(payload.projects * 5, 20)
         exp_bonus = min(payload.years_experience * 3, 20)
